@@ -1,0 +1,74 @@
+.why { background: var(--bone); }
+
+.why__dim { margin-bottom: clamp(20px, 2.4vw, 34px); }
+
+.why__list {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  border-top: 1px solid var(--rule);
+}
+
+/* Each principle is a cell on the sheet. Hovering it reads like selecting an
+   entity in CAD: dashed highlight, crosshair lit, leader line drawn out. */
+.why__item {
+  position: relative;
+  padding: clamp(26px, 3vw, 46px) clamp(18px, 2.2vw, 38px) clamp(34px, 4vw, 64px);
+  border-right: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  outline: 1px dashed transparent;
+  outline-offset: -5px;
+  transition: background-color 0.6s var(--ease), outline-color 0.45s var(--ease);
+}
+.why__item:last-child { border-right: 0; }
+.why__item:hover {
+  background: var(--ivory-deep);
+  outline-color: var(--clay);
+}
+
+.why__xhair { top: -6px; right: -6px; }
+.why__item:hover .why__xhair { color: var(--clay); }
+
+.why__no {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.66rem;
+  letter-spacing: 0.24em;
+  color: var(--clay);
+}
+/* Leader line, drawn out from the plate number on hover. */
+.why__no::after {
+  content: "";
+  flex: 1 1 auto;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.42;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.7s var(--ease);
+}
+.why__item:hover .why__no::after { transform: scaleX(1); }
+
+.why__title {
+  margin-top: clamp(30px, 4vw, 64px);
+  font-size: clamp(1.35rem, 2.1vw, 2.05rem);
+}
+
+.why__body {
+  margin-top: 14px;
+  font-size: 0.93rem;
+  line-height: 1.68;
+  color: var(--ink-mute);
+  max-width: 32ch;
+}
+
+@media (max-width: 1000px) {
+  .why__list { grid-template-columns: repeat(2, 1fr); }
+  .why__item:nth-child(2n) { border-right: 0; }
+}
+@media (max-width: 560px) {
+  .why__list { grid-template-columns: 1fr; }
+  .why__item { border-right: 0; }
+  .why__title { margin-top: 20px; }
+}

@@ -1,0 +1,45 @@
+.locations { background: var(--ivory); }
+
+.loc__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: clamp(24px, 4vw, 80px);
+}
+
+.loc {
+  display: flex;
+  flex-direction: column;
+  padding-top: clamp(20px, 2.4vw, 34px);
+  border-top: 1px solid var(--ink);
+}
+
+.loc__head { display: flex; flex-direction: column; gap: 6px; }
+.loc__city { font-size: clamp(1.9rem, 3.6vw, 3.4rem); }
+.loc__role {
+  font-size: var(--fs-label);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--clay);
+}
+
+.loc__addr {
+  margin-top: clamp(20px, 2.4vw, 32px);
+  font-style: normal;
+  font-size: clamp(0.98rem, 1.2vw, 1.14rem);
+  line-height: 1.72;
+  color: var(--ink-soft);
+}
+.loc__addr span { display: block; }
+
+.loc__phone {
+  margin-top: clamp(18px, 2vw, 26px);
+  align-self: flex-start;
+  font-family: var(--display);
+  font-size: clamp(1.3rem, 2vw, 1.85rem);
+}
+
+.loc__maps { margin-top: clamp(26px, 3vw, 44px); align-self: flex-start; }
+
+@media (max-width: 780px) {
+  .loc__grid { grid-template-columns: 1fr; gap: 48px; }
+}

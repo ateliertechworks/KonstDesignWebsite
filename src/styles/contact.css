@@ -1,0 +1,77 @@
+.contact {
+  padding-block: clamp(96px, 14vw, 210px);
+  overflow: hidden;
+}
+/* the plan is behind everything, so the type keeps its own stacking context */
+.contact__body { position: relative; z-index: 1; }
+
+/* ---------------------------------------------------------------------------
+   The drawing behind the invitation. It is decoration, so it never takes a
+   pointer, and it is thin enough that the headline stays the loudest thing
+   in the section.
+   --------------------------------------------------------------------------- */
+.contact__plan {
+  position: absolute;
+  right: calc(var(--gutter) - clamp(0px, 3vw, 54px));
+  top: clamp(40px, 7vw, 110px);
+  width: min(41vw, 560px);
+  height: auto;
+  color: var(--ivory);
+  pointer-events: none;
+  overflow: visible;
+}
+.contact__plan path { fill: none; vector-effect: non-scaling-stroke; }
+
+.plan__wall path { stroke: currentColor; stroke-width: 1.35; opacity: 0.34; }
+.plan__glass { stroke-width: 1 !important; opacity: 0.5 !important; }
+.plan__door path { stroke: currentColor; stroke-width: 1.2; opacity: 0.3; }
+.plan__swing { stroke: var(--clay) !important; opacity: 0.66 !important; }
+
+.plan__fit path { stroke: currentColor; stroke-width: 1; opacity: 0.24; }
+.plan__soft {
+  stroke: currentColor;
+  stroke-width: 1;
+  opacity: 0.14;
+  stroke-dasharray: 7 6;
+}
+
+.plan__note path { stroke: currentColor; stroke-width: 0.9; opacity: 0.26; }
+.plan__north { fill: var(--clay); stroke: none; opacity: 0.7; }
+
+.plan__type text {
+  fill: currentColor;
+  opacity: 0.36;
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 0.2em;
+}
+.plan__type .plan__tag { fill: var(--clay); opacity: 0.72; letter-spacing: 0.26em; }
+.plan__type .plan__tiny { font-size: 11px; opacity: 0.3; }
+
+.contact__title {
+  font-size: var(--fs-h1);
+  margin-top: clamp(20px, 2.6vw, 36px);
+  color: var(--ivory);
+}
+
+.contact__grid {
+  margin-top: clamp(32px, 4vw, 58px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, auto);
+  gap: clamp(24px, 4vw, 72px);
+  align-items: center;
+}
+.contact__lede { max-width: 44ch; }
+.contact__actions { display: flex; flex-wrap: wrap; gap: 14px; }
+
+
+/* Below the point where the grid stacks, the drawing has nowhere to sit
+   without running under the buttons, so it steps out entirely. */
+@media (max-width: 1080px) {
+  .contact__plan { display: none; }
+}
+
+@media (max-width: 860px) {
+  .contact__grid { grid-template-columns: 1fr; }
+  .contact__actions .btn { flex: 1 1 100%; justify-content: space-between; }
+}

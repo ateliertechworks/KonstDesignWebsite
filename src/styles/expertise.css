@@ -1,0 +1,156 @@
+.expertise { background: var(--ivory); }
+
+.expertise__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(24px, 3vw, 54px);
+  align-items: start;
+}
+
+.svc { display: flex; flex-direction: column; }
+
+.svc__media {
+  aspect-ratio: 1 / 1;
+  margin-bottom: clamp(26px, 3.2vw, 50px);
+}
+.svc:hover .svc__media img { transform: scale(1.055); }
+
+.svc__body { display: flex; flex-direction: column; flex: 1; }
+
+/* Plate number set against the first line of the title, with the rule held
+   at a common baseline across all three columns however the titles wrap. */
+.svc__top {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  gap: clamp(14px, 1.4vw, 22px);
+  padding-bottom: clamp(20px, 2.4vw, 34px);
+  border-bottom: 1px solid var(--rule);
+}
+.svc__top::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 100%;
+  height: 1px;
+  background: var(--clay);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.8s var(--ease);
+}
+.svc:hover .svc__top::after { transform: scaleX(1); }
+
+.svc__no {
+  flex: 0 0 auto;
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  color: var(--ink-mute);
+}
+
+.svc__title {
+  font-size: clamp(1.4rem, 2.3vw, 2.1rem);
+  font-weight: 300;
+  line-height: 1.16;
+  text-transform: uppercase;
+  letter-spacing: 0.012em;
+  /* Two lines' worth, so a wrapped title never drops its rule below the others. */
+  min-height: 2.32em;
+  transition: color 0.45s var(--ease);
+}
+.svc:hover .svc__title { color: var(--clay); }
+
+.svc__blurb {
+  margin-top: clamp(16px, 1.8vw, 24px);
+  font-size: clamp(0.96rem, 1.15vw, 1.12rem);
+  line-height: 1.6;
+  color: var(--ink);
+}
+.svc__detail {
+  margin-top: 12px;
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: var(--ink-mute);
+}
+
+/* --- expandable sub-services -------------------------------------------- */
+.svc__subs { margin-top: 20px; }
+
+.svc__subs-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--fs-label);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  transition: color 0.4s var(--ease);
+}
+.svc__subs-toggle:hover { color: var(--clay); }
+.svc__subs-toggle i {
+  position: relative;
+  width: 11px;
+  height: 11px;
+  display: inline-block;
+}
+.svc__subs-toggle i::before,
+.svc__subs-toggle i::after {
+  content: "";
+  position: absolute;
+  background: currentColor;
+  transition: transform 0.5s var(--ease);
+}
+.svc__subs-toggle i::before { left: 0; right: 0; top: 5px; height: 1px; }
+.svc__subs-toggle i::after { top: 0; bottom: 0; left: 5px; width: 1px; }
+.svc__subs.is-open .svc__subs-toggle i::after { transform: scaleY(0); }
+
+.svc__subs-wrap {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.65s var(--ease), opacity 0.5s var(--ease), margin-top 0.5s var(--ease);
+  opacity: 0;
+  overflow: hidden;
+}
+.svc__subs.is-open .svc__subs-wrap { grid-template-rows: 1fr; opacity: 1; margin-top: 16px; }
+.svc__subs-list { min-height: 0; }
+.svc__subs-list > li {
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+  padding: 9px 0 9px 18px;
+  border-top: 1px solid var(--rule-soft);
+  position: relative;
+}
+.svc__subs-list > li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 1.35em;
+  width: 7px;
+  height: 1px;
+  background: var(--clay);
+}
+
+.svc__cta {
+  margin-top: auto;
+  padding-top: clamp(22px, 2.4vw, 32px);
+  align-self: flex-start;
+  font-size: var(--fs-label);
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  display: inline-flex;
+  gap: 10px;
+}
+.svc__cta .arw { transition: transform 0.5s var(--ease); }
+.svc__cta:hover .arw { transform: translateX(5px); }
+
+@media (max-width: 1180px) {
+  .expertise__grid { grid-template-columns: repeat(2, 1fr); gap: clamp(28px, 4vw, 46px) clamp(20px, 3vw, 40px); }
+  .svc:last-child { grid-column: 1 / -1; }
+  .svc:last-child .svc__media { aspect-ratio: 16 / 9; }
+}
+@media (max-width: 720px) {
+  .expertise__grid { grid-template-columns: 1fr; }
+  .svc:last-child .svc__media { aspect-ratio: 1 / 1; }
+  .svc__title { min-height: 0; }
+}

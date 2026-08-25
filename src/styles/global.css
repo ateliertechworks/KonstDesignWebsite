@@ -1,0 +1,512 @@
+/* =========================================================================
+   KONST DESIGN — design system
+   ========================================================================= */
+
+:root {
+  /* --- surface ------------------------------------------------------- */
+  --ivory:        #F2EEE7;
+  --ivory-deep:   #E9E3DA;
+  --bone:         #FBF9F5;
+  --sand:         #DCD3C6;
+  --charcoal:     #16140F;
+  --charcoal-2:   #221F19;
+  --graphite:     #2E2A23;
+
+  /* --- ink ----------------------------------------------------------- */
+  --ink:          #16140F;
+  --ink-soft:     #4A443A;
+  --ink-mute:     #857C6E;
+  --ink-invert:   #F2EEE7;
+  --ink-invert-m: #A79E90;
+
+  /* --- accent -------------------------------------------------------- */
+  --clay:         #A9663F;
+  --clay-soft:    #C08A5F;
+
+  /* --- lines --------------------------------------------------------- */
+  --rule:         rgba(22, 20, 15, 0.14);
+  --rule-soft:    rgba(22, 20, 15, 0.08);
+  --rule-invert:  rgba(242, 238, 231, 0.16);
+
+  /* --- type ---------------------------------------------------------- */
+  --display: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+  --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  /* Annotation face: dimensions, plate numbers, schedules — the text that
+     would be machine-lettered on a real drawing. */
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --fs-hero:  clamp(3.1rem, 9.4vw, 10.5rem);
+  --fs-h1:    clamp(2.6rem, 7.4vw, 8rem);
+  --fs-h2:    clamp(2.1rem, 5.2vw, 5.2rem);
+  --fs-h3:    clamp(1.5rem, 2.6vw, 2.6rem);
+  --fs-body:  clamp(0.95rem, 1.05vw, 1.075rem);
+  --fs-label: clamp(0.62rem, 0.72vw, 0.72rem);
+
+  /* --- layout -------------------------------------------------------- */
+  --gutter: clamp(20px, 5vw, 84px);
+  --maxw: 1620px;
+  --sec-y: clamp(88px, 12vw, 184px);
+
+  /* --- motion -------------------------------------------------------- */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-io: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* ========================================================================= */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: auto;
+}
+
+body {
+  margin: 0;
+  background: var(--ivory);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: var(--fs-body);
+  font-weight: 300;
+  line-height: 1.68;
+  letter-spacing: 0.005em;
+  /* inherited by every descendant, so the serif face never falls back to
+     its default old-style figures in phone numbers or statistics */
+  font-variant-numeric: lining-nums;
+  font-feature-settings: "lnum" 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+body.is-locked { overflow: hidden; }
+
+h1, h2, h3, h4, p, figure, blockquote { margin: 0; }
+ul, ol { margin: 0; padding: 0; list-style: none; }
+img { display: block; max-width: 100%; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+a { color: inherit; text-decoration: none; }
+
+::selection { background: var(--clay); color: var(--bone); }
+
+:focus-visible {
+  outline: 1px solid var(--clay);
+  outline-offset: 4px;
+}
+
+/* --- film grain ---------------------------------------------------------- */
+.grain {
+  position: fixed;
+  inset: -120px;
+  z-index: 9000;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>");
+  mix-blend-mode: multiply;
+}
+
+/* =========================================================================
+   PRIMITIVES
+   ========================================================================= */
+
+.wrap {
+  width: 100%;
+  max-width: var(--maxw);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.section { padding-block: var(--sec-y); position: relative; }
+.section--dark { background: var(--charcoal); color: var(--ink-invert); }
+.section--bone { background: var(--bone); }
+
+.display {
+  font-family: var(--display);
+  font-weight: 300;
+  /* Cormorant defaults to old-style figures — phone numbers and statistics
+     need lining figures to stay legible. */
+  font-variant-numeric: lining-nums;
+  font-feature-settings: "lnum" 1;
+  line-height: 0.95;
+  letter-spacing: -0.012em;
+  text-transform: uppercase;
+}
+
+.label {
+  /* Machine lettering — the annotation face of the drawing set. */
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+.section--dark .label { color: var(--ink-invert-m); }
+
+.lede {
+  font-size: clamp(1.02rem, 1.35vw, 1.28rem);
+  line-height: 1.62;
+  color: var(--ink-soft);
+  font-weight: 300;
+}
+.section--dark .lede { color: var(--ink-invert-m); }
+
+.rule { height: 1px; background: var(--rule); border: 0; }
+.section--dark .rule { background: var(--rule-invert); }
+
+/* =========================================================================
+   BRAND MARK
+   The KD monogram ships as two alpha layers stacked in register: the
+   letterforms take currentColor so they stay legible on the dark hero and on
+   the light condensed bar, while the divider holds the brand clay.
+   ========================================================================= */
+.brandmark {
+  position: relative;
+  display: block;
+  width: calc(var(--mark-h, 26px) * 1.9);
+  height: var(--mark-h, 26px);
+}
+.brandmark__ink,
+.brandmark__accent {
+  position: absolute;
+  inset: 0;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+.brandmark__ink {
+  background: currentColor;
+  -webkit-mask-image: url('/img/brand/kd-mark.png');
+  mask-image: url('/img/brand/kd-mark.png');
+}
+.brandmark__accent {
+  background: var(--clay-soft);
+  -webkit-mask-image: url('/img/brand/kd-mark-accent.png');
+  mask-image: url('/img/brand/kd-mark-accent.png');
+}
+
+/* --- drawing sheet ------------------------------------------------------
+   Sections carry a faint drafting grid that fades out below the fold line,
+   plus a title-block strip: sheet number, a ruled scale, the discipline and
+   the monogram. It reads as the header of an architectural drawing set.
+   ------------------------------------------------------------------------ */
+.section--sheet::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  /* Graph paper: a fine module with every fifth line drawn heavier, the way
+     a drafting sheet is printed. */
+  --cad-minor: clamp(15px, 1.5vw, 24px);
+  background-image:
+    linear-gradient(to right, var(--rule-soft) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--rule-soft) 1px, transparent 1px),
+    linear-gradient(to right, var(--rule) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--rule) 1px, transparent 1px);
+  background-size:
+    var(--cad-minor) var(--cad-minor),
+    var(--cad-minor) var(--cad-minor),
+    calc(var(--cad-minor) * 5) calc(var(--cad-minor) * 5),
+    calc(var(--cad-minor) * 5) calc(var(--cad-minor) * 5);
+  opacity: 0.62;
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0.95), transparent 44%);
+  mask-image: linear-gradient(to bottom, rgba(0,0,0,0.95), transparent 44%);
+}
+.section--sheet > .wrap,
+.section--sheet > .int-rail { position: relative; z-index: 1; }
+
+.sheet {
+  display: flex;
+  align-items: center;
+  gap: clamp(12px, 1.8vw, 26px);
+  margin-bottom: clamp(38px, 6vw, 92px);
+  color: var(--ink-mute);
+}
+.section--dark .sheet { color: var(--ink-invert-m); }
+
+.sheet__no {
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  letter-spacing: 0.26em;
+  color: var(--clay);
+  white-space: nowrap;
+}
+
+/* Hairline with drafting ticks hanging off it. */
+.sheet__scale {
+  flex: 1 1 auto;
+  height: 9px;
+  min-width: 40px;
+  border-top: 1px solid var(--rule);
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--rule) 0 1px,
+    transparent 1px clamp(26px, 2.6vw, 46px)
+  );
+  background-size: 100% 5px;
+  background-repeat: no-repeat;
+}
+.section--dark .sheet__scale {
+  border-top-color: var(--rule-invert);
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--rule-invert) 0 1px,
+    transparent 1px clamp(26px, 2.6vw, 46px)
+  );
+}
+
+.sheet__caption {
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.sheet__mark {
+  --mark-h: clamp(16px, 1.5vw, 22px);
+  flex: 0 0 auto;
+  opacity: 0.5;
+}
+
+@media (max-width: 700px) {
+  .sheet__caption { display: none; }
+}
+
+/* --- CAD annotation ------------------------------------------------------
+   The vocabulary of a drawing sheet: machine lettering, dimension lines with
+   arrow terminators, and crosshairs on the grid intersections.
+   ------------------------------------------------------------------------ */
+.mono {
+  font-family: var(--mono);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.dim {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  height: 22px;
+  color: var(--ink-mute);
+}
+.section--dark .dim { color: var(--ink-invert-m); }
+
+/* Extension lines — the short uprights the dimension is measured between. */
+.dim__ext {
+  flex: 0 0 1px;
+  height: 15px;
+  background: currentColor;
+  opacity: 0.55;
+}
+
+.dim__line {
+  position: relative;
+  flex: 1 1 auto;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.55;
+}
+/* Arrow terminators. */
+.dim__line::before,
+.dim__line::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 0;
+  height: 0;
+  border-block: 3px solid transparent;
+  transform: translateY(-50%);
+}
+.dim__line::before { left: 0; border-right: 8px solid currentColor; }
+.dim__line::after { right: 0; border-left: 8px solid currentColor; }
+
+.dim__label {
+  position: absolute;
+  left: 50%;
+  bottom: 7px;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  opacity: 1;
+}
+
+/* A registration crosshair, sized to sit over a grid intersection. */
+.xhair {
+  position: absolute;
+  width: 11px;
+  height: 11px;
+  pointer-events: none;
+  color: var(--rule);
+  background:
+    linear-gradient(currentColor 0 0) center / 100% 1px no-repeat,
+    linear-gradient(currentColor 0 0) center / 1px 100% no-repeat;
+  transition: color 0.5s var(--ease);
+}
+
+/* --- section header ------------------------------------------------------ */
+.sec-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.82fr);
+  gap: clamp(24px, 4vw, 80px);
+  align-items: end;
+  padding-bottom: clamp(34px, 4vw, 62px);
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: clamp(40px, 5vw, 84px);
+}
+.section--dark .sec-head { border-color: var(--rule-invert); }
+.sec-head__label { display: block; margin-bottom: clamp(18px, 2vw, 30px); }
+.sec-head__title { font-size: var(--fs-h2); }
+.sec-head__aside { padding-bottom: 0.5rem; }
+
+@media (max-width: 860px) {
+  .sec-head { grid-template-columns: 1fr; align-items: start; gap: 22px; }
+}
+
+/* --- buttons ------------------------------------------------------------- */
+.btn {
+  --btn-fg: var(--ink);
+  --btn-line: var(--rule);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  padding: 1.15em 2.2em;
+  font-size: var(--fs-label);
+  font-weight: 500;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--btn-fg);
+  border: 1px solid var(--btn-line);
+  border-radius: 1px;
+  overflow: hidden;
+  isolation: isolate;
+  transition: color 0.55s var(--ease), border-color 0.55s var(--ease);
+}
+.btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--btn-fill, var(--ink));
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition: transform 0.55s var(--ease);
+}
+.btn:hover { color: var(--btn-fg-hover, var(--ivory)); border-color: var(--btn-fill, var(--ink)); }
+.btn:hover::after { transform: scaleY(1); }
+.btn .arw { transition: transform 0.55s var(--ease); }
+.btn:hover .arw { transform: translateX(5px); }
+
+.btn--solid {
+  --btn-fg: var(--ivory);
+  --btn-line: var(--ink);
+  --btn-fill: var(--ivory);
+  --btn-fg-hover: var(--ink);
+  background: var(--ink);
+}
+.btn--light {
+  --btn-fg: var(--ivory);
+  --btn-line: rgba(242, 238, 231, 0.4);
+  --btn-fill: var(--ivory);
+  --btn-fg-hover: var(--ink);
+}
+.btn--clay {
+  --btn-fg: var(--bone);
+  --btn-line: var(--clay);
+  --btn-fill: var(--bone);
+  --btn-fg-hover: var(--ink);
+  background: var(--clay);
+}
+
+/* --- animated underline link -------------------------------------------- */
+.ulink {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 3px;
+}
+.ulink::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.5s var(--ease);
+}
+.ulink:hover::after { transform: scaleX(1); transform-origin: left; }
+
+/* --- reveal primitives --------------------------------------------------- */
+[data-reveal] { will-change: transform, opacity; }
+
+.img-frame {
+  position: relative;
+  overflow: hidden;
+  background: var(--ivory-deep);
+}
+.img-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.001);
+  transition: transform 1.1s var(--ease);
+}
+
+/* --- utility ------------------------------------------------------------- */
+.vh {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.num {
+  font-variant-numeric: lining-nums tabular-nums;
+  font-feature-settings: "lnum" 1, "tnum" 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* --- masked line headings ------------------------------------------------ */
+/* --- per-word headline masks --------------------------------------------
+   Each word sits in its own clipped box so it can ride up independently.
+   The padding/margin pair keeps descenders from being sheared off by the
+   clip, and the mask spacing replaces the collapsed inline whitespace.
+   ------------------------------------------------------------------------ */
+.line-words .line { display: block; }
+.w-mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  padding-bottom: 0.14em;
+  margin-bottom: -0.14em;
+}
+.w-mask + .w-mask { margin-left: 0.24em; }
+.w-mask > [data-word] {
+  display: inline-block;
+  will-change: transform;
+  transition: color 0.5s var(--ease);
+}
+/* Hovering a headline picks out one word at a time. */
+@media (hover: hover) {
+  .w-mask:hover > [data-word] { color: var(--clay); }
+  .section--dark .w-mask:hover > [data-word] { color: var(--clay-soft); }
+}

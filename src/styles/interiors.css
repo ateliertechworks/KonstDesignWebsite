@@ -1,0 +1,238 @@
+/* =========================================================================
+   HORIZONTAL RAIL
+   Vertical scroll is translated into sideways travel by ScrollTrigger, so
+   the six cards read as one continuous line. `.is-static` (touch / reduced
+   motion) drops back to a native swipe rail.
+   ========================================================================= */
+.int-rail {
+  position: relative;
+  height: 100vh;
+  min-height: 520px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+.int-track {
+  display: flex;
+  /* The rail is a flex row, so the track must refuse to shrink — otherwise it
+     compresses to the viewport and there is nothing left to scroll through. */
+  flex: none;
+  align-items: flex-start;
+  gap: clamp(18px, 2.4vw, 44px);
+  padding-inline: var(--gutter);
+  will-change: transform;
+}
+
+.int-card {
+  flex: 0 0 clamp(258px, 30vw, 460px);
+}
+
+/* Travel indicator ------------------------------------------------------- */
+.int-rail__prog {
+  position: absolute;
+  left: var(--gutter);
+  right: var(--gutter);
+  bottom: clamp(26px, 4vh, 54px);
+  height: 1px;
+  background: var(--rule);
+}
+.int-rail__prog span {
+  display: block;
+  height: 100%;
+  background: var(--clay);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+/* Native swipe fallback -------------------------------------------------- */
+.interiors.is-static .int-rail {
+  height: auto;
+  min-height: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 8px;
+}
+.interiors.is-static .int-rail::-webkit-scrollbar { display: none; }
+.interiors.is-static .int-track { transform: none !important; }
+.interiors.is-static .int-card { scroll-snap-align: center; }
+.interiors.is-static .int-rail__prog { display: none; }
+
+.int-card__btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+}
+
+.int-card__media {
+  display: block;
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: var(--ivory-deep);
+}
+.int-card__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 1.15s var(--ease), filter 0.9s var(--ease);
+}
+.int-card__btn:hover .int-card__media img { transform: scale(1.075); }
+
+.int-card__media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(16, 14, 10, 0.44), rgba(16, 14, 10, 0) 52%);
+  opacity: 0;
+  transition: opacity 0.7s var(--ease);
+}
+.int-card__btn:hover .int-card__media::after { opacity: 1; }
+
+.int-card__plus {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(242, 238, 231, 0.6);
+  border-radius: 50%;
+  opacity: 0;
+  transform: scale(0.82);
+  transition: opacity 0.55s var(--ease), transform 0.55s var(--ease);
+}
+.int-card__plus::before,
+.int-card__plus::after {
+  content: "";
+  position: absolute;
+  background: var(--ivory);
+}
+.int-card__plus::before { left: 13px; right: 13px; top: 50%; height: 1px; }
+.int-card__plus::after { top: 13px; bottom: 13px; left: 50%; width: 1px; }
+.int-card__btn:hover .int-card__plus { opacity: 1; transform: scale(1); }
+
+.int-card__foot {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid var(--rule-soft);
+  margin-top: 14px;
+}
+.int-card__no { font-family: var(--mono); font-size: 0.64rem; letter-spacing: 0.2em; color: var(--ink-mute); }
+.int-card__title {
+  font-family: var(--display);
+  font-size: clamp(1.15rem, 1.6vw, 1.55rem);
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  transition: color 0.4s var(--ease);
+}
+.int-card__btn:hover .int-card__title { color: var(--clay); }
+
+@media (max-width: 780px) {
+  .int-card { flex-basis: min(74vw, 380px); }
+}
+
+/* =========================================================================
+   LIGHTBOX
+   ========================================================================= */
+.lb {
+  position: fixed;
+  inset: 0;
+  z-index: 9500;
+  display: grid;
+  place-items: center;
+  padding: clamp(14px, 3vw, 48px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s var(--ease);
+}
+.lb.is-open { opacity: 1; pointer-events: auto; }
+
+.lb__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(12, 11, 8, 0.86);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  cursor: pointer;
+}
+
+.lb__panel {
+  position: relative;
+  width: min(1180px, 100%);
+  max-height: 100%;
+  overflow: auto;
+  background: var(--bone);
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  transform: translateY(26px) scale(0.985);
+  opacity: 0;
+  animation: lb-in 0.65s var(--ease) 0.05s forwards;
+}
+
+@keyframes lb-in {
+  to { transform: none; opacity: 1; }
+}
+
+.lb__media { margin: 0; background: var(--ivory-deep); }
+.lb__media img { width: 100%; height: 100%; object-fit: cover; min-height: 320px; }
+
+.lb__body {
+  padding: clamp(26px, 3.4vw, 58px);
+  display: flex;
+  flex-direction: column;
+}
+.lb__no { color: var(--clay); }
+.lb__title { font-size: clamp(1.9rem, 3.4vw, 3.2rem); margin-top: 14px; }
+.lb__desc {
+  margin-top: clamp(16px, 2vw, 26px);
+  color: var(--ink-soft);
+  font-size: clamp(0.94rem, 1.1vw, 1.06rem);
+  line-height: 1.72;
+}
+.lb__actions { margin-top: clamp(24px, 3vw, 38px); margin-bottom: clamp(20px, 3vw, 36px); }
+
+.lb__nav {
+  margin-top: auto;
+  padding-top: clamp(24px, 3vw, 40px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-top: 1px solid var(--rule);
+  font-size: var(--fs-label);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+.lb__nav button { transition: color 0.4s var(--ease); }
+.lb__nav button:hover { color: var(--ink); }
+
+.lb__close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 42px;
+  height: 42px;
+  background: rgba(251, 249, 245, 0.9);
+  border: 1px solid var(--rule);
+}
+.lb__close span {
+  position: absolute;
+  left: 12px; right: 12px; top: 50%;
+  height: 1px;
+  background: var(--ink);
+}
+.lb__close span:first-child { transform: rotate(45deg); }
+.lb__close span:last-child { transform: rotate(-45deg); }
+.lb__close:hover { background: var(--ink); }
+.lb__close:hover span { background: var(--bone); }
+
+@media (max-width: 880px) {
+  .lb__panel { grid-template-columns: 1fr; }
+  .lb__media img { min-height: 0; aspect-ratio: 4 / 3; }
+}

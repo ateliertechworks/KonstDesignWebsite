@@ -1,0 +1,145 @@
+.story {
+  position: relative;
+  height: 620vh;
+  background: var(--charcoal);
+  color: var(--ink-invert);
+}
+
+.story__sticky {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.story__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: -2;
+}
+
+.story__scrim {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(to top, rgba(12, 11, 8, 0.86) 0%, rgba(12, 11, 8, 0.44) 30%, rgba(12, 11, 8, 0) 62%),
+    linear-gradient(to right, rgba(12, 11, 8, 0.62) 0%, rgba(12, 11, 8, 0) 58%),
+    linear-gradient(to left, rgba(12, 11, 8, 0.5) 0%, rgba(12, 11, 8, 0) 22%);
+}
+
+/* --- chapters ------------------------------------------------------------ */
+.story__copy {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: clamp(78px, 13vh, 150px);
+}
+
+.story__copy { display: grid; }
+/* every chapter shares one cell and sits on the baseline, so a two-line
+   statement and a one-line statement start from the same place */
+.story__copy > * { grid-area: 1 / 1; align-self: end; }
+
+.story__chapter {
+  max-width: min(62rem, 74vw);
+}
+
+.story__title {
+  font-size: clamp(2.1rem, 5.1vw, 5.1rem);
+  color: var(--ivory);
+  text-shadow: 0 2px 44px rgba(0, 0, 0, 0.4);
+}
+.story__title span { display: block; }
+
+.story__sub {
+  margin-top: clamp(14px, 1.8vw, 24px);
+  max-width: 34ch;
+  font-size: clamp(0.88rem, 1.05vw, 1.04rem);
+  line-height: 1.6;
+  color: rgba(242, 238, 231, 0.72);
+  font-weight: 300;
+}
+
+/* --- progress rail ------------------------------------------------------- */
+.story__meta {
+  position: absolute;
+  right: var(--gutter);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  color: rgba(242, 238, 231, 0.88);
+  text-shadow: 0 1px 18px rgba(0, 0, 0, 0.55);
+}
+
+.story__counter { font-size: 0.64rem; letter-spacing: 0.22em; }
+
+.story__rail {
+  position: relative;
+  width: 1px;
+  height: clamp(120px, 22vh, 240px);
+  background: rgba(242, 238, 231, 0.34);
+}
+.story__rail span {
+  position: absolute;
+  inset: 0;
+  background: var(--ivory);
+  transform: scaleY(0);
+  transform-origin: top;
+  will-change: transform;
+}
+
+.story__meta-label {
+  font-size: 0.58rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  writing-mode: vertical-rl;
+}
+
+/* --- hint ---------------------------------------------------------------- */
+.story__hint {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(22px, 4vh, 40px);
+  transform: translateX(-50%);
+  color: rgba(242, 238, 231, 0.82);
+  text-shadow: 0 1px 18px rgba(0, 0, 0, 0.55);
+}
+.story__hint .label { color: inherit; letter-spacing: 0.3em; }
+
+/* --- tablet / mobile ----------------------------------------------------- */
+@media (max-width: 1024px) {
+  .story { height: 560vh; }
+  .story__meta { gap: 12px; }
+  .story__meta-label { display: none; }
+}
+
+@media (max-width: 780px) {
+  .story { height: 500vh; }
+
+  .story__scrim {
+    background:
+      linear-gradient(to top, rgba(12, 11, 8, 0.96) 0%, rgba(12, 11, 8, 0.72) 26%, rgba(12, 11, 8, 0) 52%),
+      linear-gradient(to bottom, rgba(12, 11, 8, 0.7) 0%, rgba(12, 11, 8, 0) 22%);
+  }
+
+  .story__copy { bottom: clamp(52px, 9vh, 88px); }
+  .story__chapter { max-width: none; }
+  .story__title { font-size: clamp(1.85rem, 8.2vw, 3rem); }
+
+  /* sit in the letterbox band above the image, not on top of it */
+  .story__meta { right: 16px; top: clamp(84px, 12vh, 120px); transform: none; gap: 10px; }
+  .story__rail { height: 84px; }
+  .story__hint { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .story { height: 320vh; }
+}
