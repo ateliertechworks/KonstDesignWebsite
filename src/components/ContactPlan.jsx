@@ -18,7 +18,7 @@ export default function ContactPlan() {
     <svg
       ref={ref}
       className="contact__plan"
-      viewBox="0 0 760 620"
+      viewBox="0 0 760 545"
       role="presentation"
       aria-hidden="true"
       focusable="false"
@@ -26,10 +26,10 @@ export default function ContactPlan() {
       {/* --- shell: two lines, because that is how a wall is drawn --------- */}
       <g className="plan__wall">
         {[
-          'M40 40 H220', 'M360 40 H680', 'M680 40 V500', 'M680 500 H40',
-          'M40 500 V380', 'M40 300 V40',
-          'M52 52 H220', 'M360 52 H668', 'M668 52 V488', 'M668 488 H52',
-          'M52 488 V380', 'M52 300 V52',
+          'M40 40 H430', 'M600 40 H680', 'M680 40 V420', 'M680 420 H40',
+          'M40 420 V336', 'M40 260 V40',
+          'M52 52 H430', 'M600 52 H668', 'M668 52 V408', 'M668 408 H52',
+          'M52 408 V336', 'M52 260 V52',
         ].map((d) => <path key={d} d={d} pathLength="1" data-draw="wall" />)}
         {/* stub wall between the two zones */}
         {['M400 52 V168', 'M412 52 V168', 'M400 168 H412'].map((d) => (
@@ -39,17 +39,17 @@ export default function ContactPlan() {
 
       {/* --- window, and the door you are being invited through ----------- */}
       <g className="plan__wall">
-        {['M220 40 V52', 'M360 40 V52'].map((d) => (
+        {['M430 40 V52', 'M600 40 V52'].map((d) => (
           <path key={d} d={d} pathLength="1" data-draw="wall" />
         ))}
-        <path className="plan__glass" d="M220 46 H360" pathLength="1" data-draw="wall" />
+        <path className="plan__glass" d="M430 46 H600" pathLength="1" data-draw="wall" />
       </g>
       <g className="plan__door">
-        {['M40 300 H52', 'M40 380 H52'].map((d) => (
+        {['M40 260 H52', 'M40 336 H52'].map((d) => (
           <path key={d} d={d} pathLength="1" data-draw="wall" />
         ))}
-        <path d="M52 380 H128" pathLength="1" data-draw="fit" />
-        <path className="plan__swing" d="M128 380 A76 76 0 0 0 52 304" pathLength="1" data-draw="fit" />
+        <path d="M52 336 H128" pathLength="1" data-draw="fit" />
+        <path className="plan__swing" d="M128 336 A76 76 0 0 0 52 260" pathLength="1" data-draw="fit" />
       </g>
 
       {/* --- living: media wall, sofa on axis, chairs either side --------- */}
@@ -84,32 +84,32 @@ export default function ContactPlan() {
       {/* --- planting ------------------------------------------------------ */}
       <g className="plan__fit">
         {[
-          'M612 432 m-22 0 a22 22 0 1 0 44 0 a22 22 0 1 0 -44 0',
-          'M110 448 m-17 0 a17 17 0 1 0 34 0 a17 17 0 1 0 -34 0',
+          'M634 378 m-18 0 a18 18 0 1 0 36 0 a18 18 0 1 0 -36 0',
+          'M112 378 m-16 0 a16 16 0 1 0 32 0 a16 16 0 1 0 -32 0',
         ].map((d) => <path key={d} d={d} pathLength="1" data-draw="fit" />)}
         {[
-          'M612 432 m-7 0 a7 7 0 1 0 14 0 a7 7 0 1 0 -14 0',
-          'M110 448 m-6 0 a6 6 0 1 0 12 0 a6 6 0 1 0 -12 0',
+          'M634 378 m-6 0 a6 6 0 1 0 12 0 a6 6 0 1 0 -12 0',
+          'M112 378 m-6 0 a6 6 0 1 0 12 0 a6 6 0 1 0 -12 0',
         ].map((d) => <path key={d} d={d} pathLength="1" data-draw="fit" />)}
       </g>
 
       {/* --- annotation: dimensions, north, and what the rooms are -------- */}
       <g className="plan__note">
         {[
-          'M40 506 V546', 'M680 506 V546', 'M40 540 H680',
-          'M33 547 L47 533', 'M673 547 L687 533',
+          'M40 426 V466', 'M680 426 V466', 'M40 460 H680',
+          'M33 467 L47 453', 'M673 467 L687 453',
         ].map((d) => <path key={d} d={d} pathLength="1" data-draw="note" />)}
         <path d="M720 90 m-20 0 a20 20 0 1 0 40 0 a20 20 0 1 0 -40 0" pathLength="1" data-draw="note" />
         <path className="plan__north" d="M720 74 L713 98 L720 94 L727 98 Z" pathLength="1" data-draw="note" />
       </g>
 
       <g className="plan__type">
-        <text x="360" y="566" textAnchor="middle" data-fade>34&#8242;-0&#8243;</text>
+        <text x="360" y="486" textAnchor="middle" data-fade>34&#8242;-0&#8243;</text>
         <text x="215" y="348" textAnchor="middle" data-fade>LIVING</text>
-        <text x="540" y="374" textAnchor="middle" data-fade>DINING</text>
+        <text x="524" y="374" textAnchor="middle" data-fade>DINING</text>
         <text x="720" y="122" textAnchor="middle" className="plan__tiny" data-fade>N</text>
-        <text x="40" y="598" className="plan__tag" data-fade>INTERIOR PLAN</text>
-        <text x="680" y="598" textAnchor="end" className="plan__tiny" data-fade>1:75</text>
+        <text x="40" y="518" className="plan__tag" data-fade>INTERIOR PLAN</text>
+        <text x="680" y="518" textAnchor="end" className="plan__tiny" data-fade>1:75</text>
       </g>
     </svg>
   );

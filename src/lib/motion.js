@@ -175,7 +175,7 @@ export function useLineReveal(ref, { start = 'top 88%', end = 'bottom 14%', dela
    real length, and [data-fade] carries the parts a dash would ruin (dashed
    rugs) or that were never strokes (text).
    ------------------------------------------------------------------------- */
-export function usePlanDraw(ref, { start = 'top 76%', end = 'bottom 14%', once = true } = {}) {
+export function usePlanDraw(ref, { start = 'top bottom', end = 'bottom top', once = true } = {}) {
   useLayoutEffect(() => {
     const el = ref.current;
     /* Nothing is set until we know we are animating: with reduced motion the
@@ -190,10 +190,14 @@ export function usePlanDraw(ref, { start = 'top 76%', end = 'bottom 14%', once =
       gsap.set(strokes, { strokeDasharray: 1, strokeDashoffset: 1 });
       gsap.set(fades, { opacity: 0 });
 
+      /* The section is the trigger, not the drawing: the drawing is absolutely
+         positioned and bleeds out of the section, so its own box is a poor
+         thing to measure against. */
+      const trigger = el.closest('.section') || el;
       const tl = gsap.timeline({
         scrollTrigger: once
-          ? { trigger: el, start, once: true }
-          : { trigger: el, start, end, toggleActions: LOOP },
+          ? { trigger, start, once: true }
+          : { trigger, start, end, toggleActions: LOOP },
       });
 
       ['wall', 'fit', 'note'].forEach((pass, i) => {

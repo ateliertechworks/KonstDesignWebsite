@@ -12,62 +12,56 @@
    --------------------------------------------------------------------------- */
 .contact__plan {
   position: absolute;
-  right: calc(var(--gutter) - clamp(0px, 3vw, 54px));
-  top: clamp(40px, 7vw, 110px);
-  width: min(41vw, 560px);
+  top: clamp(8px, 1.4vw, 34px);
+  right: clamp(8px, 1.2vw, 30px);
+  width: min(42vw, 720px);
   height: auto;
   color: var(--ivory);
   pointer-events: none;
   overflow: visible;
 }
-.contact__plan path { fill: none; vector-effect: non-scaling-stroke; }
 
-.plan__wall path { stroke: currentColor; stroke-width: 1.35; opacity: 0.34; }
-.plan__glass { stroke-width: 1 !important; opacity: 0.5 !important; }
-.plan__door path { stroke: currentColor; stroke-width: 1.2; opacity: 0.3; }
-.plan__swing { stroke: var(--clay) !important; opacity: 0.66 !important; }
+/* Stroke widths and type are in viewBox units and scale with the drawing —
+   non-scaling-stroke would hold them steady but it also changes how the dash
+   array is measured, and the draw-on depends on pathLength dashing. The
+   numbers below are set for the 720px case: 760 / 720 means everything lands
+   at about 95% of what is written here. It reads as a backdrop, so nothing in
+   it is allowed to compete with the headline. */
+.contact__plan path { fill: none; }
 
-.plan__fit path { stroke: currentColor; stroke-width: 1; opacity: 0.24; }
-.plan__soft {
+.contact__plan .plan__wall path { stroke: currentColor; stroke-width: 1.7; opacity: 0.30; }
+.contact__plan .plan__glass { stroke-width: 1.2; opacity: 0.40; }
+.contact__plan .plan__door path { stroke: currentColor; stroke-width: 1.5; opacity: 0.26; }
+.contact__plan .plan__swing { stroke: var(--clay); opacity: 0.62; }
+
+.contact__plan .plan__fit path { stroke: currentColor; stroke-width: 1.3; opacity: 0.23; }
+.contact__plan .plan__soft {
   stroke: currentColor;
-  stroke-width: 1;
-  opacity: 0.14;
-  stroke-dasharray: 7 6;
+  stroke-width: 1.2;
+  opacity: 0.15;
+  stroke-dasharray: 9 8;
 }
 
-.plan__note path { stroke: currentColor; stroke-width: 0.9; opacity: 0.26; }
-.plan__north { fill: var(--clay); stroke: none; opacity: 0.7; }
+.contact__plan .plan__note path { stroke: currentColor; stroke-width: 1.15; opacity: 0.24; }
+.contact__plan .plan__north { fill: var(--clay); stroke: none; opacity: 0.62; }
 
-.plan__type text {
+.contact__plan .plan__type text {
   fill: currentColor;
-  opacity: 0.36;
+  opacity: 0.32;
   font-family: var(--mono);
-  font-size: 13px;
+  font-size: 16px;
   letter-spacing: 0.2em;
 }
-.plan__type .plan__tag { fill: var(--clay); opacity: 0.72; letter-spacing: 0.26em; }
-.plan__type .plan__tiny { font-size: 11px; opacity: 0.3; }
-
-.contact__title {
-  font-size: var(--fs-h1);
-  margin-top: clamp(20px, 2.6vw, 36px);
-  color: var(--ivory);
+.contact__plan .plan__type .plan__tag {
+  fill: var(--clay);
+  opacity: 0.62;
+  letter-spacing: 0.26em;
 }
-
-.contact__grid {
-  margin-top: clamp(32px, 4vw, 58px);
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, auto);
-  gap: clamp(24px, 4vw, 72px);
-  align-items: center;
-}
-.contact__lede { max-width: 44ch; }
-.contact__actions { display: flex; flex-wrap: wrap; gap: 14px; }
-
+.contact__plan .plan__type .plan__tiny { font-size: 14px; opacity: 0.27; }
 
 /* Below the point where the grid stacks, the drawing has nowhere to sit
    without running under the buttons, so it steps out entirely. */
-@media (max-width: 1080px) {
+@media (max-width: 1180px) {
   .contact__plan { display: none; }
 }
 

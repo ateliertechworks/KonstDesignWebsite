@@ -23,16 +23,25 @@ OUT_W, OUT_H = 1600, 1200          # 4:3, the case-study stage ratio
 
 # slug -> (source, crop box in source pixels or None for the whole image, note)
 PREVIEWS = [
-    ("rathinapuri-residence", "services/visualization.webp", (0, 0, 612, 466),
-     "street elevation at dusk — the quiet face, the recessed entry"),
-    ("courtyard-house", "services/architecture.webp", (0, 150, 1254, 1090),
-     "deep overhangs and shaded balconies, evening"),
+    # Rathinapuri's story is the finish — borrowed daylight, warm off-white
+    # plaster, teak where a hand touches it. An interior carries that better
+    # than another street shot.
+    # Dropped below the false ceiling: the point here is the window and the
+    # evening light coming through it, not the ceiling detail.
+    ("rathinapuri-residence", "interiors/ceiling.webp", (330, 348, 1230, 1023),
+     "warm plaster and borrowed evening light"),
+    ("courtyard-house", "services/visualization.webp", (0, 0, 612, 466),
+     "two storeys with deep shaded balconies, at dusk"),
     ("loft-living-room", "services/interiors.webp", (0, 120, 1254, 1060),
      "the long living volume, cove lighting, the tall media wall"),
     ("mak-complex-interiors", "interiors/visitors.webp", (196, 0, 1476, 941),
      "the seating group a visitor meets first"),
-    ("saravanampatti-villa", "services/visualization.webp", (0, 468, 606, 930),
-     "the model itself — a cutaway of the whole floor plate"),
+    # This project IS the photoreal render, so it gets the strongest one: a
+    # villa at dusk, which is exactly the deliverable the case study describes.
+    # It previously showed a white-ground technical cutaway, which read as a
+    # drawing rather than as the thing the client signed off.
+    ("saravanampatti-villa", "services/architecture.webp", (0, 150, 1254, 1090),
+     "the villa at dusk — photoreal, before a brick was laid"),
     ("peelamedu-apartment", "interiors/kitchen.webp", (196, 0, 1476, 941),
      "the modular run, the one place the money went into finish"),
 ]

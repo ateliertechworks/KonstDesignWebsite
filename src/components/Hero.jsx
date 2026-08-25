@@ -66,7 +66,7 @@ export default function Hero({ ready }) {
           <span className="hero__mask"><span data-hero="line">tell your story.</span></span>
         </h1>
 
-        <p className="hero__sub" data-hero="fade">Architecture • Interior Design • 3D Visualization</p>
+        <p className="hero__sub" data-hero="fade">Architecture • Interior Design</p>
 
         <div className="hero__cta" data-hero="fade">
           <a
