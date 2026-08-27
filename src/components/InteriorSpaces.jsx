@@ -25,7 +25,11 @@ export default function InteriorSpaces() {
   /* -----------------------------------------------------------------------
      Vertical scroll drives the rail sideways: the rail pins while the six
      cards travel exactly their overflow width, then the page moves on.
-     Touch and reduced-motion fall back to a native swipe rail (.is-static).
+
+     This runs on phones too. It used to fall back to a native swipe rail
+     below 781px, which meant the section's whole idea — the page scrolling
+     the room sideways — simply did not exist on the devices most people read
+     it on. Only reduced-motion keeps the plain swipe rail now.
      ----------------------------------------------------------------------- */
   useLayoutEffect(() => {
     const rail = railRef.current;
@@ -39,7 +43,7 @@ export default function InteriorSpaces() {
 
     const mm = gsap.matchMedia();
 
-    mm.add('(min-width: 781px) and (prefers-reduced-motion: no-preference)', () => {
+    mm.add('(prefers-reduced-motion: no-preference)', () => {
       root.classList.remove('is-static');
 
       gsap.to(track, {
@@ -62,7 +66,7 @@ export default function InteriorSpaces() {
       return () => root.classList.add('is-static');
     });
 
-    mm.add('(max-width: 780px), (prefers-reduced-motion: reduce)', () => {
+    mm.add('(prefers-reduced-motion: reduce)', () => {
       root.classList.add('is-static');
     });
 
@@ -109,7 +113,7 @@ export default function InteriorSpaces() {
           {INTERIORS.map((item, i) => (
             <li className="int-card" key={item.no} data-reveal-item>
               <button className="int-card__btn" onClick={() => setOpenIndex(i)}>
-                <span className="int-card__media img-frame">
+                <span className={`int-card__media img-frame ${i === 0 ? 'int-card__media--land' : ''}`}>
                   <img
                     src={item.img}
                     alt={item.alt}

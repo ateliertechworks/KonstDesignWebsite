@@ -1,6 +1,10 @@
+/* The sequence IS the home page. There is no static hero screen in front of
+   it: the canvas pins at the very top of the document, so the first flick of
+   the wheel is already moving frames, and the opening statement rides on top
+   of those frames rather than on a still of its own. */
 .story {
   position: relative;
-  height: 620vh;
+  height: 720vh;
   background: var(--charcoal);
   color: var(--ink-invert);
 }
@@ -30,6 +34,151 @@
     linear-gradient(to top, rgba(12, 11, 8, 0.86) 0%, rgba(12, 11, 8, 0.44) 30%, rgba(12, 11, 8, 0) 62%),
     linear-gradient(to right, rgba(12, 11, 8, 0.62) 0%, rgba(12, 11, 8, 0) 58%),
     linear-gradient(to left, rgba(12, 11, 8, 0.5) 0%, rgba(12, 11, 8, 0) 22%);
+}
+
+/* --- opening statement ---------------------------------------------------
+   The opening lives inside a pinned 100svh box, so nothing here may size off
+   viewport WIDTH alone — on a short, wide window a vw-only clamp overflows
+   the screen and the statement lands on top of the first chapter. Every step
+   of the scale is min(vw, vh), and the inner box is a three-row grid whose
+   middle row is the only one allowed to absorb slack.
+   ------------------------------------------------------------------------- */
+.story__lede {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  will-change: opacity, transform;
+}
+
+/* A little extra shade only while the lede is up — it fades out with it, so
+   the frames are never dimmed once the statement has gone. */
+.story__lede::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  /* Deliberately light. The section scrim underneath is already carrying the
+     bottom and left, and stacking two full veils turns a bright empty loft
+     into mud. This only has to buy the head rule its contrast. */
+  background:
+    linear-gradient(to bottom, rgba(14, 12, 9, 0.48) 0%, rgba(14, 12, 9, 0) 26%, rgba(14, 12, 9, 0) 58%, rgba(14, 12, 9, 0.42) 100%),
+    linear-gradient(to right, rgba(14, 12, 9, 0.34) 0%, rgba(14, 12, 9, 0) 52%);
+}
+
+.story__lede-inner {
+  height: 100%;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  align-items: start;
+  padding-block: clamp(84px, 12vh, 132px) clamp(22px, 4vh, 46px);
+}
+
+/* --- statement ----------------------------------------------------------- */
+/* Bottom row of the 1fr band, so the type sits on the same optical line
+   whatever the window height. */
+.story__lede-body { grid-row: 1; align-self: end; }
+
+.story__lede-mask { display: block; overflow: hidden; }
+.story__lede-mask > span { display: block; }
+
+.story__lede-title {
+  font-size: clamp(2.35rem, min(7vw, 9.6vh), 6.6rem);
+  line-height: 0.94;
+  letter-spacing: 0.004em;
+  /* Generous, so the two authored lines stay two lines at desktop sizes and
+     only fold when the window genuinely cannot hold them. */
+  max-width: min(24ch, 100%);
+  color: var(--ivory);
+}
+
+.story__lede-sub {
+  margin-top: clamp(14px, 2.2vh, 26px);
+  font-family: var(--mono);
+  font-size: clamp(0.6rem, 0.78vw, 0.74rem);
+  font-weight: 400;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(242, 238, 231, 0.62);
+}
+
+.story__lede-cta {
+  margin-top: clamp(22px, 3.4vh, 42px);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* .btn--solid is an ink fill with an ink border, which is right on the bone
+   sections further down and invisible here — the letterbox band under the
+   phone crop is that same ink. Invert it: ivory fill, ink lettering, and the
+   hover wipe goes the other way. */
+.story__lede-cta .btn--solid {
+  --btn-fg: var(--ink);
+  --btn-line: var(--ivory);
+  --btn-fill: var(--ink);
+  --btn-fg-hover: var(--ivory);
+  background: var(--ivory);
+}
+
+/* --- foot ---------------------------------------------------------------- */
+.story__lede-foot {
+  grid-row: 2;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  padding-top: clamp(20px, 3.2vh, 40px);
+  border-top: 1px solid rgba(242, 238, 231, 0.14);
+}
+
+.story__stats { display: flex; gap: clamp(22px, 4vw, 72px); }
+.story__stats li { display: flex; flex-direction: column; gap: 4px; }
+.story__stat-v {
+  font-family: var(--display);
+  font-size: clamp(1.35rem, min(2.4vw, 3.4vh), 2.4rem);
+  line-height: 1;
+  color: var(--ivory);
+}
+.story__stat-l {
+  font-size: 0.6rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(242, 238, 231, 0.55);
+}
+
+.story__scroll {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  flex: 0 0 auto;
+  color: rgba(242, 238, 231, 0.7);
+  transition: color 0.5s var(--ease);
+}
+.story__scroll:hover { color: var(--ivory); }
+.story__scroll .label { color: inherit; letter-spacing: 0.28em; }
+
+.story__scroll-line {
+  display: block;
+  width: clamp(40px, 6vw, 88px);
+  height: 1px;
+  background: rgba(242, 238, 231, 0.26);
+  overflow: hidden;
+}
+.story__scroll-arw { font-size: 0.8rem; line-height: 1; }
+
+.story__scroll-line i {
+  display: block;
+  width: 38%;
+  height: 100%;
+  background: var(--ivory);
+  animation: story-sweep 2.6s var(--ease-io) infinite;
+}
+
+@keyframes story-sweep {
+  0%   { transform: translateX(-100%); }
+  55%  { transform: translateX(260%); }
+  100% { transform: translateX(260%); }
 }
 
 /* --- chapters ------------------------------------------------------------ */
@@ -77,6 +226,7 @@
   gap: 18px;
   color: rgba(242, 238, 231, 0.88);
   text-shadow: 0 1px 18px rgba(0, 0, 0, 0.55);
+  opacity: 0;
 }
 
 .story__counter { font-size: 0.64rem; letter-spacing: 0.22em; }
@@ -103,31 +253,41 @@
   writing-mode: vertical-rl;
 }
 
-/* --- hint ---------------------------------------------------------------- */
-.story__hint {
-  position: absolute;
-  left: 50%;
-  bottom: clamp(22px, 4vh, 40px);
-  transform: translateX(-50%);
-  color: rgba(242, 238, 231, 0.82);
-  text-shadow: 0 1px 18px rgba(0, 0, 0, 0.55);
-}
-.story__hint .label { color: inherit; letter-spacing: 0.3em; }
-
 /* --- tablet / mobile ----------------------------------------------------- */
 @media (max-width: 1024px) {
-  .story { height: 560vh; }
+  .story { height: 660vh; }
+  .story__lede-title { max-width: min(18ch, 100%); }
   .story__meta { gap: 12px; }
   .story__meta-label { display: none; }
 }
 
 @media (max-width: 780px) {
-  .story { height: 500vh; }
+  /* Shorter than desktop on purpose. A swipe covers far less of the page than
+     a wheel flick, so the same 720vh would be roughly seven full swipes just
+     to clear the opening. */
+  .story { height: 520vh; }
 
+  .story__lede::before {
+    background: linear-gradient(to bottom, rgba(14, 12, 9, 0.5) 0%, rgba(14, 12, 9, 0) 20%);
+  }
+
+  .story__lede-inner { padding-block: clamp(76px, 11vh, 104px) clamp(18px, 3vh, 30px); }
+  .story__lede-title { font-size: clamp(2rem, min(9vw, 7.4vh), 3.2rem); max-width: none; }
+  .story__scroll-line { width: 44px; }
+  .story__lede-cta .btn { flex: 1 1 100%; justify-content: space-between; }
+  .story__lede-foot { gap: 16px; }
+  .story__stats { gap: 20px; }
+  .story__stats li:nth-child(3) { display: none; }
+  .story__scroll .label { display: none; }
+
+  /* The phone tier is a 4:5 crop painted full width from the top, so the
+     frame ends around 57% down on every common phone aspect and the rest is
+     already the section colour. The scrim's only job here is to dissolve that
+     edge instead of leaving a ruled line across the screen. */
   .story__scrim {
     background:
-      linear-gradient(to top, rgba(12, 11, 8, 0.96) 0%, rgba(12, 11, 8, 0.72) 26%, rgba(12, 11, 8, 0) 52%),
-      linear-gradient(to bottom, rgba(12, 11, 8, 0.7) 0%, rgba(12, 11, 8, 0) 22%);
+      linear-gradient(to bottom, rgba(12, 11, 8, 0.5) 0%, rgba(12, 11, 8, 0) 16%),
+      linear-gradient(to bottom, rgba(12, 11, 8, 0) 34%, rgba(12, 11, 8, 0.72) 52%, #16140F 60%);
   }
 
   .story__copy { bottom: clamp(52px, 9vh, 88px); }
@@ -137,9 +297,17 @@
   /* sit in the letterbox band above the image, not on top of it */
   .story__meta { right: 16px; top: clamp(84px, 12vh, 120px); transform: none; gap: 10px; }
   .story__rail { height: 84px; }
-  .story__hint { display: none; }
+}
+
+/* Short windows — a laptop with the console open, a phone in landscape.
+   The statement stays; the supporting furniture stands down. */
+@media (max-height: 620px) {
+  .story__lede-inner { padding-block: clamp(64px, 10vh, 84px) 18px; }
+  .story__lede-cta { margin-top: 16px; }
+  .story__stats { display: none; }
+  .story__lede-foot { justify-content: flex-end; border-top: none; padding-top: 12px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .story { height: 320vh; }
+  .story { height: 420vh; }
 }

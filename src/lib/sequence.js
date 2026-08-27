@@ -113,8 +113,51 @@ export function createSequence({ count, srcFor, onProgress }) {
 
 export const IMG_ASPECT = 1280 / 720;
 const PORTRAIT_CUTOFF = 1.15;
-const PORTRAIT_FILL = 1.22;   // slight side crop so the band is not too thin
-const CANVAS_MAX_W = 2560;    // backing-store ceiling, for GPU cost
+const PORTRAIT_FILL = 1.22;   // slight side crop so the letterbox band is not too thin
+/* Widest viewport that gets the cropped phone tier. Kept in step with the
+   780px breakpoint in styles/story-sequence.css, which lays the copy out for
+   a frame that ends partway down the screen. */
+const PHONE_MAX_W = 780;
+
+/* Native size and aspect of each encoded tier, so nothing anywhere has to
+   guess. `p` is the phone tier: the same frame cropped to 4:5 at build time,
+   because a 16:9 frame letterboxed onto a tall phone shrinks to about a third
+   of the screen and the statement ends up floating in dead space. */
+export const TIERS = {
+  m:  { w: 960,  aspect: IMG_ASPECT },
+  d:  { w: 1280, aspect: IMG_ASPECT },
+  hd: { w: 1920, aspect: IMG_ASPECT },
+  p:  { w: 720,  aspect: 720 / 900 },
+};
+
+/* -------------------------------------------------------------------------
+   Where the frame lands inside the canvas box. Both the tier picker and the
+   painter work from this one function — they used to derive it separately,
+   which is how the canvas ended up sized for one thing and fed another.
+   ------------------------------------------------------------------------- */
+function geometry(cw, ch, tier) {
+  const aspect = (TIERS[tier] || TIERS.hd).aspect;
+
+  /* Phone: full width, pinned to the top. The band left underneath is not
+     spare room, it is where the type goes. */
+  if (tier === 'p') {
+    const dw = cw;
+    return { dw, dh: dw / aspect, align: 0 };
+  }
+
+  const vp = cw / Math.max(ch, 1);
+  if (vp >= aspect) {                     // wide — cover by width
+    const dw = cw;
+    return { dw, dh: dw / aspect, align: 0.5 };
+  }
+  if (vp >= PORTRAIT_CUTOFF) {            // mildly tall — cover by height
+    return { dw: ch * aspect, dh: ch, align: 0 };
+  }
+  /* Portrait on something too large for the phone crop — a tablet held
+     upright. Letterboxed, because covering would show a sliver of a room. */
+  const dw = cw * PORTRAIT_FILL;
+  return { dw, dh: dw / aspect, align: 0.46 };
+}
 
 /* -------------------------------------------------------------------------
    Which frame tier this display actually needs.
@@ -124,17 +167,16 @@ const CANVAS_MAX_W = 2560;    // backing-store ceiling, for GPU cost
    a retina laptop and a retina phone each get the right one.
    ------------------------------------------------------------------------- */
 export function pickFrameTier() {
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
   const w = window.innerWidth;
   const h = window.innerHeight;
-  const vp = w / h;
 
-  const paintedCssWidth =
-    vp >= IMG_ASPECT ? w                        // wide — cover by width
-      : vp >= PORTRAIT_CUTOFF ? h * IMG_ASPECT  // mildly tall — cover by height
-        : w * PORTRAIT_FILL;                    // portrait — letterboxed
+  /* A phone held upright gets its own crop, not a smaller version of the
+     landscape one. A tablet held upright does not: it has the screen for a
+     letterboxed 16:9 frame, and the phone crop would be an upscale there. */
+  if (w / Math.max(h, 1) < PORTRAIT_CUTOFF && w <= PHONE_MAX_W) return 'p';
 
-  const needed = Math.min(paintedCssWidth * dpr, CANVAS_MAX_W);
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const needed = geometry(w, h, 'hd').dw * dpr;
   let tier = needed <= 1000 ? 'm' : needed <= 1400 ? 'd' : 'hd';
 
   /* Eighty decoded 1920x1080 frames is a lot of bitmap to keep warm. Step
@@ -148,20 +190,33 @@ export function pickFrameTier() {
   return tier;
 }
 
-export function createPainter(canvas) {
+export function createPainter(canvas, tier = 'hd') {
   const ctx = canvas.getContext('2d', { alpha: false, desynchronized: true });
+  const nativeW = (TIERS[tier] || TIERS.hd).w;
   let cw = 0;
   let ch = 0;
   let current = null;
 
   const resize = () => {
     const rect = canvas.getBoundingClientRect();
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
     cw = Math.round(rect.width);
     ch = Math.round(rect.height);
-    canvas.width = Math.min(Math.round(cw * dpr), CANVAS_MAX_W);
-    canvas.height = Math.round((canvas.width / Math.max(cw, 1)) * ch);
-    ctx.setTransform(canvas.width / Math.max(cw, 1), 0, 0, canvas.width / Math.max(cw, 1), 0, 0);
+    if (!cw || !ch) return;
+
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const { dw } = geometry(cw, ch, tier);
+
+    /* Back the canvas at the resolution the frame actually has, and no more.
+       Asking for full dpr on a retina screen used to buy a 2560-wide backing
+       store that a 1920-wide frame was then stretched across: every painted
+       pixel resampled, every frame, for detail that was never in the file.
+       Clamping to 1:1 draws the frame exactly as encoded and leaves the last
+       bit of scaling to the compositor, which does it once, in hardware. */
+    const scale = Math.min(dpr, nativeW / Math.max(dw, 1));
+    canvas.width = Math.max(1, Math.round(cw * scale));
+    canvas.height = Math.max(1, Math.round(ch * scale));
+
+    ctx.setTransform(scale, 0, 0, scale, 0, 0);
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
     if (current) paint(current, true);
@@ -172,19 +227,9 @@ export function createPainter(canvas) {
     current = img;
     if (!cw || !ch) return;
 
-    const vp = cw / ch;
-    let dw;
-    let dh;
-    let dy;
-
-    if (vp >= IMG_ASPECT) {          // wide — cover by width
-      dw = cw; dh = cw / IMG_ASPECT; dy = (ch - dh) / 2;
-    } else if (vp >= PORTRAIT_CUTOFF) { // mildly tall — cover by height
-      dh = ch; dw = ch * IMG_ASPECT; dy = 0;
-    } else {                          // portrait — letterbox, cropped a little
-      dw = cw * PORTRAIT_FILL; dh = dw / IMG_ASPECT; dy = (ch - dh) * 0.46;
-    }
+    const { dw, dh, align } = geometry(cw, ch, tier);
     const dx = (cw - dw) / 2;
+    const dy = (ch - dh) * align;
 
     ctx.fillStyle = '#16140F';
     ctx.fillRect(0, 0, cw, ch);

@@ -48,21 +48,49 @@ SCALE = MASTER_W / SRC_W          # crop boxes below are written in source coord
 # The generator's sparkle mark sits in the same place in every frame.
 WATERMARK_BOX = (1120, 564, 1196, 640)
 
-# deblock  - kill the 8x8 JPEG grid
-# hqdn3d   - spatial 0, temporal 7: static camera, so this is nearly free detail
-# scale    - Lanczos to the master size
-# unsharp  - restore edge definition lost to the source's compression
+# deblock    - kill the 8x8 JPEG grid
+# atadenoise - adaptive TEMPORAL averaging over a 9-frame window. The camera
+#              never moves, so for every static pixel this averages nine
+#              independent samples of the same detail and recovers real
+#              information the compressor threw away. It is adaptive, so the
+#              parts that DO move (the sheet, the furniture arriving) are
+#              excluded rather than smeared. A wider window (s=15) recovers
+#              marginally more on the walls but leaves a visible ghost trail
+#              of the sheet across the floor, so 9 is the ceiling here.
+# hqdn3d     - gentle spatial pass to clean up what is left, mostly mosquito
+#              noise clinging to the window mullions
+# scale up   - to 2x the master, so the sharpening below has sub-pixel room
+# unsharp    - edge definition, done once offline instead of by the browser
+# scale down - back to the master size. Sharpening at 2x and resampling down
+#              is what keeps the mullions crisp without ringing halos, which
+#              a single-pass unsharp at 1x could not do.
+SS_W, SS_H = MASTER_W * 2, MASTER_H * 2
 FILTERS = (
     'deblock=filter=strong:block=8,'
-    'hqdn3d=0:0:7:7,'
-    f'scale={MASTER_W}:{MASTER_H}:flags=lanczos,'
-    'unsharp=5:5:0.55:5:5:0.0'
+    'atadenoise=s=9:0a=0.02:0b=0.05:1a=0.02:1b=0.05:2a=0.02:2b=0.05,'
+    'hqdn3d=1.0:1.0:5:5,'
+    f'scale={SS_W}:{SS_H}:flags=lanczos+accurate_rnd+full_chroma_int,'
+    'unsharp=3:3:1.0:3:3:0.45,'
+    f'scale={MASTER_W}:{MASTER_H}:flags=lanczos+accurate_rnd'
 )
 
+# Quality is raised across the board: the masters are much cleaner than they
+# used to be, and there is no point spending a restoration pass only to hand
+# the result back to a lossy encoder at the old settings. The phone tier moves
+# the most (86 -> 92) because it was the one showing WebP blocking of its own
+# on top of the source's.
+# A 16:9 frame on a 9:19.5 phone letterboxes down to about a third of the
+# screen, which leaves the opening statement floating in dead space. So phones
+# get their own tier: the master cropped to 4:5 and painted full width, image
+# above and type below. 4:5 rather than 9:16 because the room composition is
+# wide - a taller crop would keep the window and throw away the room.
+PORTRAIT_CROP_ASPECT = 0.8            # 4:5
+
 TIERS = [
-    ('hd', (1920, 1080), 90),
-    ('d',  (1280, 720),  92),
-    ('m',  (960, 540),   86),
+    ('hd', (1920, 1080), 93),
+    ('d',  (1280, 720),  93),
+    ('m',  (960, 540),   92),
+    ('p',  (720, 900),   93),         # phones - cropped, see above
 ]
 
 
@@ -145,7 +173,12 @@ def main():
             if i in (1, 2, 4, 11, 24, 31, 43, 48, 56, 58, 70, 71, 74, 76, 79, 80):
                 cache[i] = im.copy()          # frames the section crops need
             for tier, size, q in TIERS:
-                out = im if im.size == size else im.resize(size, Image.LANCZOS)
+                src = im
+                if tier == 'p':
+                    cw = round(MASTER_H * PORTRAIT_CROP_ASPECT)
+                    x = (MASTER_W - cw) // 2
+                    src = im.crop((x, 0, x + cw, MASTER_H))
+                out = src if src.size == size else src.resize(size, Image.LANCZOS)
                 out.save(os.path.join(PUB, 'frames', tier, f'f-{i:03d}.webp'),
                          'WEBP', quality=q, method=6)
 

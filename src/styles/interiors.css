@@ -6,7 +6,10 @@
    ========================================================================= */
 .int-rail {
   position: relative;
-  height: 100vh;
+  /* svh, not vh: the rail pins for its whole height on a phone, and vh there
+     is the tall-viewport number the browser reports with the URL bar already
+     collapsed — the section would hang past the screen until it did. */
+  height: 100svh;
   min-height: 520px;
   display: flex;
   align-items: center;
@@ -133,7 +136,9 @@
 .int-card__btn:hover .int-card__title { color: var(--clay); }
 
 @media (max-width: 780px) {
-  .int-card { flex-basis: min(74vw, 380px); }
+  /* Bigger than before: the rail now pins to a full screen on phones as well,
+     so the cards have the room and the old width left the screen half empty. */
+  .int-card { flex-basis: min(82vw, 420px); }
 }
 
 /* =========================================================================

@@ -3,11 +3,11 @@ import { useSmoothScroll, ScrollTrigger } from './lib/motion.js';
 
 import Intro from './components/Intro.jsx';
 import Nav from './components/Nav.jsx';
-import Hero from './components/Hero.jsx';
 import ScrollStory from './components/ScrollStory.jsx';
+import ServiceHandoff from './components/ServiceHandoff.jsx';
 import Expertise from './components/Expertise.jsx';
 import InteriorSpaces from './components/InteriorSpaces.jsx';
-import Projects from './components/Projects.jsx';
+import ProjectsCloud from './components/ProjectsCloud.jsx';
 import Story from './components/Story.jsx';
 import Awards from './components/Awards.jsx';
 import Why from './components/Why.jsx';
@@ -19,6 +19,15 @@ export default function App() {
   const [introDone, setIntroDone] = useState(false);
 
   useSmoothScroll();
+
+  /* The sequence is the home page, so the home page is frame 1 — the empty
+     room. A reload that restores the previous scroll offset would drop the
+     visitor into the middle of the sequence instead, which reads as the site
+     opening on a half-furnished room. */
+  useEffect(() => {
+    if ('scrollRestoration' in window.history) window.history.scrollRestoration = 'manual';
+    window.scrollTo(0, 0);
+  }, []);
 
   /* The intro overlay holds the page still; release scroll once it lifts. */
   useEffect(() => {
@@ -39,11 +48,12 @@ export default function App() {
       <Nav ready={introDone} />
 
       <main id="top">
-        <Hero ready={introDone} />
-        <ScrollStory />
+        {/* The frame sequence is the home page: it is pinned from the very
+            top, so the effect runs from the first pixel of scroll. */}
+        <ScrollStory ready={introDone} />
         <Expertise />
         <InteriorSpaces />
-        <Projects />
+        <ProjectsCloud />
         <Story />
         <Awards />
         <Why />
@@ -52,6 +62,11 @@ export default function App() {
       </main>
 
       <Footer />
+
+      {/* Outside <main> on purpose: a transformed ancestor would make its
+          `fixed` positioning relative to that ancestor instead of the
+          viewport, and the flight would drift. */}
+      <ServiceHandoff />
     </>
   );
 }

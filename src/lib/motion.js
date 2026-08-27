@@ -25,12 +25,24 @@ export function useSmoothScroll() {
   useEffect(() => {
     if (prefersReducedMotion()) return undefined;
 
+    /* ignoreMobileResize: on a phone the URL bar collapsing fires a resize,
+       and a refresh mid-scroll makes the pinned sequence jump. The viewport
+       has not really changed, so the measurements should not either. */
+    ScrollTrigger.config({ ignoreMobileResize: true });
+
     const lenis = new Lenis({
       duration: 1.1,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true,
-      syncTouch: false,
-      touchMultiplier: 1.4,
+      /* syncTouch drives touch scrolling through the same interpolator as the
+         wheel. Without it the phone runs on native momentum while the canvas
+         scrubs on its own easing, and the two visibly disagree during a
+         flick. touchLerp keeps the finger feeling attached rather than
+         rubbery. */
+      syncTouch: true,
+      syncTouchLerp: 0.09,
+      touchInertiaMultiplier: 22,
+      touchMultiplier: 1.5,
     });
 
     window.__lenis = lenis;
@@ -53,6 +65,13 @@ export function scrollToId(id) {
   if (!el) return;
   if (window.__lenis) window.__lenis.scrollTo(el, { offset: 0, duration: 1.35 });
   else el.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
+}
+
+/* Scroll to a raw document offset — used where the target element is pinned
+   at the top of the page and so has no useful offsetTop of its own. */
+export function scrollToY(y) {
+  if (window.__lenis) window.__lenis.scrollTo(y, { duration: 1.35 });
+  else window.scrollTo({ top: y, behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
 }
 
 /* -------------------------------------------------------------------------

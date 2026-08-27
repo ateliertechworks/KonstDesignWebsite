@@ -26,7 +26,7 @@ export default function Expertise() {
           {EXPERTISE.map((s, i) => (
             <article className="svc" key={s.no}>
               <RevealImage
-                className="svc__media"
+                className={`svc__media ${i === 2 ? 'svc__media--float' : ''}`}
                 src={s.img}
                 alt={s.alt}
                 delay={i * 0.05}

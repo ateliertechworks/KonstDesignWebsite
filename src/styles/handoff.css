@@ -1,0 +1,59 @@
+/* =========================================================================
+   SERVICE → INTERIOR HANDOFF
+   The 3D render that lifts out of the services grid and lands in the bedroom
+   card. Fixed, so no section's overflow can clip it on the way down, and
+   inert, so it never eats a click meant for the page underneath.
+   ========================================================================= */
+
+.handoff {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 500;            /* over the sections, under the nav (8000) */
+  pointer-events: none;
+  visibility: hidden;
+  overflow: hidden;
+  background: var(--ivory-deep);
+  transform-origin: 50% 50%;
+  /* transform, clip-path and opacity are all the animation writes — every one
+     of them composited, so the flight never touches layout. */
+  will-change: transform, clip-path, opacity;
+  box-shadow:
+    0 40px 90px -40px rgba(16, 14, 10, 0.55),
+    0 8px 24px -14px rgba(16, 14, 10, 0.4);
+}
+
+.handoff img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Reads as a drawing in transit rather than a stray photo. */
+.handoff__tag {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  font-size: 0.56rem;
+  letter-spacing: 0.24em;
+  color: var(--ivory);
+  background: rgba(16, 14, 10, 0.62);
+  white-space: nowrap;
+}
+.handoff__tag i { font-style: normal; opacity: 0.6; }
+
+/* Phones get the flight too — the panel pinches through the middle of the
+   journey so it has room to swing on a narrow screen. Only the tag stands
+   down, because at that size it would cover a third of the render. */
+@media (max-width: 780px) {
+  .handoff__tag { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .handoff { display: none; }
+}

@@ -100,9 +100,12 @@ a { color: inherit; text-decoration: none; }
   inset: -120px;
   z-index: 9000;
   pointer-events: none;
-  opacity: 0.035;
+  opacity: 0.05;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>");
-  mix-blend-mode: multiply;
+  /* No mix-blend-mode. A blended fixed layer forces the compositor to read
+     back the whole viewport every time anything under it repaints — and the
+     frame canvas repaints on every scrolled pixel. Straight low-opacity
+     overlay costs nothing and reads the same at this strength. */
 }
 
 /* =========================================================================

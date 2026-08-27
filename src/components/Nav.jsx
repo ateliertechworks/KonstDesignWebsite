@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { NAV, COMPANY } from '../lib/site.js';
-import { scrollToId } from '../lib/motion.js';
+import { scrollToId, ScrollTrigger } from '../lib/motion.js';
 import '../styles/nav.css';
 
 export default function Nav({ ready }) {
   const [solid, setSolid] = useState(false);
+  const [onDark, setOnDark] = useState(false);
   const [hide, setHide] = useState(false);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(NAV[0].href);
@@ -15,37 +16,71 @@ export default function Nav({ ready }) {
   const itemRefs = useRef({});
   const progRef = useRef(null);
 
-  /* --- scroll state: condense, auto-hide, progress, scroll-spy ----------- */
+  /* --- scroll state: condense, auto-hide, progress, scroll-spy -----------
+     Smooth scrolling fires this on every animation frame, so it may not read
+     layout: querySelector + getBoundingClientRect per nav item, plus
+     scrollHeight, is five forced reflows a frame on a page that is mostly
+     one very tall pinned section. The document offsets are measured once and
+     re-measured only when the page itself can have changed size. */
   useEffect(() => {
+    let spots = [];
+    let max = 1;
+    let storyEnd = 0;
+
+    const measure = () => {
+      const doc = document.documentElement;
+      max = Math.max(1, doc.scrollHeight - window.innerHeight);
+      /* Where the pinned sequence lets go of the viewport. */
+      const story = document.getElementById('story-sequence');
+      storyEnd = story
+        ? story.getBoundingClientRect().top + window.scrollY + story.offsetHeight - window.innerHeight
+        : 0;
+      spots = NAV
+        .filter((item) => item.href !== '#top')
+        .map((item) => {
+          const el = document.querySelector(item.href);
+          return el ? { href: item.href, top: el.getBoundingClientRect().top + window.scrollY } : null;
+        })
+        .filter(Boolean);
+    };
+
     const onScroll = () => {
       const y = window.scrollY;
       const vh = window.innerHeight;
 
-      setSolid(y > vh * 0.5);
+      /* Three states, because the bar crosses two very different backdrops.
+         Over the sequence the frames swing from a blown-out window to a dark
+         floor, so the light capsule is unreadable there — and its backdrop
+         blur would have to re-filter the canvas on every scrolled pixel. */
+      setSolid(y > storyEnd);
+      setOnDark(y > vh * 0.35 && y <= storyEnd);
       setHide(y > lastY.current && y > vh * 1.1);
       lastY.current = y;
 
-      const max = document.documentElement.scrollHeight - vh;
       if (progRef.current) {
-        progRef.current.style.transform = `scaleX(${max > 0 ? Math.min(1, y / max) : 0})`;
+        progRef.current.style.transform = `scaleX(${Math.min(1, y / max)})`;
       }
 
       /* The section whose top has most recently passed under the bar wins. */
       let current = NAV[0].href;
-      for (const item of NAV) {
-        if (item.href === '#top') continue;
-        const el = document.querySelector(item.href);
-        if (el && el.getBoundingClientRect().top <= vh * 0.34) current = item.href;
-      }
+      const line = y + vh * 0.34;
+      for (const spot of spots) if (spot.top <= line) current = spot.href;
       setActive(current);
     };
 
+    const onResize = () => { measure(); onScroll(); };
+
+    measure();
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll);
+    window.addEventListener('resize', onResize);
+    /* Images and the frame sequence land after mount and change the page
+       height — ScrollTrigger already broadcasts exactly that moment. */
+    ScrollTrigger.addEventListener('refresh', measure);
     return () => {
       window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onScroll);
+      window.removeEventListener('resize', onResize);
+      ScrollTrigger.removeEventListener('refresh', measure);
     };
   }, []);
 
@@ -107,6 +142,7 @@ export default function Nav({ ready }) {
           'nav',
           ready ? 'is-ready' : '',
           solid ? 'is-solid' : '',
+          onDark ? 'is-dark' : '',
           hide && !open ? 'is-hidden' : '',
           open ? 'is-open' : '',
         ].join(' ')}

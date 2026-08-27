@@ -24,7 +24,23 @@
       rel="stylesheet"
     />
 
-    <link rel="preload" as="image" href="./img/misc/hero.webp" />
+    <!-- The first frame of the sequence is the first paint of the site, so it
+         is worth a preload — but only the tier that will actually be used.
+         The breakpoint matches PORTRAIT_CUTOFF in src/lib/sequence.js. -->
+    <link
+      rel="preload"
+      as="image"
+      href="./frames/hd/f-001.webp"
+      media="(min-aspect-ratio: 115/100)"
+      fetchpriority="high"
+    />
+    <link
+      rel="preload"
+      as="image"
+      href="./frames/p/f-001.webp"
+      media="(max-aspect-ratio: 115/100)"
+      fetchpriority="high"
+    />
 
     <script type="application/ld+json">
       {
@@ -59,8 +75,8 @@
         ]
       }
     </script>
-    <script type="module" crossorigin src="./assets/index-V-0FOhfW.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-Cb9IF3Gl.css">
+    <script type="module" crossorigin src="./assets/index-D5BslpEH.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-MjJWJKQ8.css">
   </head>
   <body>
     <div id="root"></div>
