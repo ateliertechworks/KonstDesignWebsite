@@ -7,7 +7,7 @@ import ScrollStory from './components/ScrollStory.jsx';
 import ServiceHandoff from './components/ServiceHandoff.jsx';
 import Expertise from './components/Expertise.jsx';
 import InteriorSpaces from './components/InteriorSpaces.jsx';
-import ProjectsCloud from './components/ProjectsCloud.jsx';
+import ProjectsWall from './components/ProjectsWall.jsx';
 import Story from './components/Story.jsx';
 import Awards from './components/Awards.jsx';
 import Why from './components/Why.jsx';
@@ -53,7 +53,7 @@ export default function App() {
         <ScrollStory ready={introDone} />
         <Expertise />
         <InteriorSpaces />
-        <ProjectsCloud />
+        <ProjectsWall />
         <Story />
         <Awards />
         <Why />

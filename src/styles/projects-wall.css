@@ -1,0 +1,719 @@
+/* ===========================================================================
+   PROJECTS — the drawing wall
+   Companion sheet to components/ProjectsWall.jsx.
+
+   The whole section is one 3D scene: .pw__stage owns the perspective, .pw__rig
+   is the preserve-3d world inside it, and everything the scroll handler
+   touches is transform / opacity only. Nothing in here uses `filter` on a
+   panel — a filter would flatten its children and collapse the slab edges and
+   the popped plate number back into the surface.
+   =========================================================================== */
+
+.pw {
+  /* --- geometry -------------------------------------------------------- */
+  --pw-w: clamp(268px, 30vw, 460px);   /* plate width — everything scales off it */
+  --pw-foot: 78px;                     /* caption bar height */
+  --pw-h: calc(var(--pw-w) * 0.75 + var(--pw-foot));   /* photos are 4:3 */
+  --pw-t: 16px;                        /* slab thickness */
+  /* The wall sits above dead centre: the detail plate owns the bottom-left of
+     the stage, and the fanned deck is wide enough to reach it otherwise. The
+     lift is applied to the rig, so the floor grid rises with the plates. */
+  --pw-lift: 90px;
+
+  /* --- palette: a dark gallery, lit warm from below --------------------- */
+  --pw-ink: #F2EEE7;
+  --pw-ink-m: #A79E90;
+  --pw-line: rgba(242, 238, 231, 0.105);
+  --pw-line-2: rgba(242, 238, 231, 0.23);
+  --pw-plate: #14120E;
+  --pw-plate-2: #1D1A14;
+
+  padding-block: var(--sec-y) 0;
+  background: var(--charcoal);
+}
+
+/* =========================================================================
+   STAGE — pinned, one screen tall, holds the perspective
+   ========================================================================= */
+.pw__stage {
+  position: relative;
+  height: 100svh;
+  overflow: hidden;
+  isolation: isolate;
+  perspective: 1500px;
+  /* Eye level slightly above centre, so the floor grid is seen from above
+     rather than edge-on. */
+  perspective-origin: 50% 43%;
+}
+
+.pw__room {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    /* warm floor bounce */
+    radial-gradient(130% 70% at 50% 96%, rgba(169, 102, 63, 0.26) 0%, rgba(169, 102, 63, 0) 62%),
+    /* the room's own light, behind the plates */
+    radial-gradient(78% 52% at 50% 34%, rgba(120, 110, 92, 0.30) 0%, rgba(20, 18, 14, 0) 72%),
+    linear-gradient(to bottom, #100E0B 0%, #1A1712 46%, #0B0A07 100%);
+}
+/* Vignette — keeps the eye on the plate at centre. */
+.pw__room::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(115% 88% at 50% 46%, rgba(0, 0, 0, 0) 46%, rgba(0, 0, 0, 0.62) 100%);
+}
+
+/* =========================================================================
+   RIG — the 3D world. Tilted a few degrees by the pointer, nothing else.
+   ========================================================================= */
+.pw__rig {
+  position: absolute;
+  inset: 0 0 var(--pw-lift) 0;
+  z-index: 1;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+/* --- floor ----------------------------------------------------------------
+   The same drafting grid the light sections print behind their content
+   (.section--sheet), laid flat and run to the horizon. rotateX(90deg) about
+   the plane's own centre puts half of it in front of the plates and half
+   behind, so the grid converges properly instead of starting at the wall.
+   ------------------------------------------------------------------------- */
+.pw__floor {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 220vw;
+  height: 190vh;
+  transform-origin: 50% 50%;
+  transform: translate3d(-50%, calc(-50% + var(--pw-h) / 2 + 26px), 0) rotateX(90deg);
+  background-image:
+    linear-gradient(to right, var(--pw-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--pw-line) 1px, transparent 1px),
+    linear-gradient(to right, var(--pw-line-2) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--pw-line-2) 1px, transparent 1px);
+  background-size: 56px 56px, 56px 56px, 280px 280px, 280px 280px;
+  background-position: 50% 50%;
+  /* Stops short of the horizon. Run any further and the grid's far edge lands
+     at eye level, which draws a hairline straight across the plates; stopping
+     here tucks it behind them, so the floor only shows in the gaps. */
+  -webkit-mask-image: radial-gradient(ellipse 38% 26% at 50% 55%, #000 0%, rgba(0, 0, 0, 0.5) 56%, transparent 80%);
+  mask-image: radial-gradient(ellipse 38% 26% at 50% 55%, #000 0%, rgba(0, 0, 0, 0.5) 56%, transparent 80%);
+  pointer-events: none;
+}
+
+/* =========================================================================
+   PLATES
+   Absolutely centred by auto margins, so the transform chain the scroll
+   handler writes stays clean: translate3d → rotateY → scale, nothing else.
+   ========================================================================= */
+.pw__panel {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: var(--pw-w);
+  height: var(--pw-h);
+  transform-style: preserve-3d;
+  /* No will-change here. `will-change: opacity` makes Chrome clip this
+     element's 3D subtree to its own border box, which cuts the popped plate
+     number in half. The translate3d the scroll handler writes already earns
+     the panel a composited layer. */
+}
+
+.pw__face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  text-align: left;
+  background: var(--pw-plate);
+  border: 1px solid rgba(242, 238, 231, 0.15);
+  box-shadow: 0 60px 90px -50px rgba(0, 0, 0, 0.95);
+  cursor: pointer;
+}
+.pw__face:focus-visible { outline: 1px solid var(--clay-soft); outline-offset: 5px; }
+
+.pw__img {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--graphite);
+}
+.pw__img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.001);
+  transition: transform 1.2s var(--ease);
+}
+@media (hover: hover) {
+  .pw__face:hover .pw__img img { transform: scale(1.05); }
+}
+
+/* --- caption bar ---------------------------------------------------------- */
+.pw__foot {
+  flex: 0 0 var(--pw-foot);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding-inline: clamp(14px, 1.4vw, 20px);
+  border-top: 1px solid rgba(242, 238, 231, 0.14);
+  background: linear-gradient(to bottom, var(--pw-plate-2), var(--pw-plate));
+}
+.pw__foot-main { min-width: 0; }
+
+.pw__name {
+  display: block;
+  font-family: var(--display);
+  font-weight: 300;
+  font-size: clamp(16px, 1.42vw, 24px);
+  line-height: 1.06;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  color: var(--pw-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pw__where {
+  display: block;
+  margin-top: 6px;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--pw-ink-m);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pw__open {
+  flex: 0 0 auto;
+  font-size: 9.5px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--clay-soft);
+}
+
+/* --- plate number ---------------------------------------------------------
+   Pushed 34px off the surface. It is the clearest depth cue in the whole
+   section: as the plate swings, the number visibly separates from it.
+   ------------------------------------------------------------------------- */
+.pw__no {
+  position: absolute;
+  z-index: 3;
+  top: -15px;
+  left: -15px;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  transform: translateZ(34px);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--charcoal);
+  background: var(--clay-soft);
+  box-shadow: 0 20px 34px -16px rgba(0, 0, 0, 0.9);
+  pointer-events: none;
+}
+
+/* --- physical thickness ---------------------------------------------------
+   Two slabs hinged on the plate's own edges and swung into depth. Each one
+   carries backface-visibility, so it shows only from the side you could
+   actually see it from — the geometry decides, not the scroll handler.
+   ------------------------------------------------------------------------- */
+.pw__edge {
+  position: absolute;
+  top: 0;
+  width: var(--pw-t);
+  height: 100%;
+  backface-visibility: hidden;
+  pointer-events: none;
+}
+.pw__edge--r {
+  right: 0;
+  transform-origin: left center;
+  transform: translateX(100%) rotateY(90deg);
+  background: linear-gradient(to right, #3A342A 0%, #211E17 55%, #131109 100%);
+}
+.pw__edge--l {
+  left: 0;
+  transform-origin: right center;
+  transform: translateX(-100%) rotateY(-90deg);
+  background: linear-gradient(to left, #3A342A 0%, #211E17 55%, #131109 100%);
+}
+
+/* --- depth scrim + raking light ------------------------------------------
+   Lifted 1px off the face so the two never z-fight. Opacity on both is
+   written by the scroll handler.
+   ------------------------------------------------------------------------- */
+.pw__scrim,
+.pw__sheen {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  opacity: 0;
+  pointer-events: none;
+}
+.pw__scrim {
+  transform: translateZ(1px);
+  background: linear-gradient(to bottom, rgba(9, 8, 6, 0.94) 0%, rgba(9, 8, 6, 0.8) 100%);
+}
+.pw__sheen {
+  transform: translateZ(1px);
+  background: linear-gradient(
+    100deg,
+    rgba(255, 244, 228, 0) 10%,
+    rgba(255, 240, 220, 0.5) 34%,
+    rgba(255, 255, 255, 0.12) 52%,
+    rgba(255, 244, 228, 0) 76%
+  );
+}
+
+/* --- light pool -----------------------------------------------------------
+   Hinged on the plate's bottom edge and laid flat, 2px above the grid, so it
+   foreshortens with the floor instead of floating as a flat blob.
+   ------------------------------------------------------------------------- */
+.pw__pool {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 190%;
+  height: 260px;
+  margin-left: -95%;
+  transform-origin: 50% 0;
+  transform: translate3d(0, 24px, 0) rotateX(90deg);
+  background: radial-gradient(
+    ellipse 48% 60% at 50% 0%,
+    rgba(201, 148, 96, 0.34) 0%,
+    rgba(201, 148, 96, 0.1) 44%,
+    rgba(201, 148, 96, 0) 72%
+  );
+  pointer-events: none;
+}
+
+/* =========================================================================
+   HUD — flat, in front of the rig, never rotated
+   ========================================================================= */
+.pw__hud {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+.pw__hud button,
+.pw__hud a { pointer-events: auto; }
+
+/* --- stage title block ------------------------------------------------------
+   Sheet number, ruled hairline, caption — the same title block .sheet prints
+   at the head of every light section, re-set for the pinned dark stage.
+   ------------------------------------------------------------------------- */
+.pw__stagehead {
+  position: absolute;
+  left: var(--gutter);
+  right: var(--gutter);
+  top: clamp(30px, 5vh, 54px);
+  display: flex;
+  align-items: center;
+  gap: clamp(12px, 1.8vw, 24px);
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--pw-ink-m);
+}
+.pw__stagehead-no { flex: 0 0 auto; color: var(--clay-soft); }
+.pw__stagehead-rule {
+  flex: 1 1 auto;
+  height: 1px;
+  background: rgba(242, 238, 231, 0.14);
+}
+.pw__stagehead-cap { flex: 0 0 auto; }
+
+/* --- detail plate --------------------------------------------------------- */
+.pw__plate {
+  position: absolute;
+  left: var(--gutter);
+  bottom: clamp(72px, 9vh, 110px);
+  width: min(340px, 30vw);
+}
+.pw__plate-meta {
+  display: block;
+  margin-bottom: 12px;
+  font-size: 10px;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--clay-soft);
+}
+.pw__plate-title {
+  margin: 0 0 12px;
+  font-size: clamp(1.5rem, 2.1vw, 2.3rem);
+  color: var(--pw-ink);
+}
+.pw__plate-desc {
+  margin: 0 0 18px;
+  font-size: 0.9rem;
+  line-height: 1.62;
+  color: var(--pw-ink-m);
+}
+.pw__plate-cta {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--pw-ink);
+}
+.pw__plate-cta .arw { transition: transform 0.5s var(--ease); display: inline-block; }
+.pw__plate-cta:hover .arw { transform: translateX(5px); }
+
+/* --- index rail ------------------------------------------------------------
+   The active project's name slides open out of the tick — a schedule column
+   on a drawing sheet, not a dot nav.
+   ------------------------------------------------------------------------- */
+.pw__rail {
+  position: absolute;
+  right: var(--gutter);
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  gap: 13px;
+}
+.pw__rail-btn {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  width: 100%;
+  padding: 3px 0;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--pw-ink-m);
+  transition: color 0.45s var(--ease);
+}
+.pw__rail-btn:hover { color: var(--pw-ink); }
+.pw__rail-btn.is-on { color: var(--clay-soft); }
+
+/* Numbers only. An expanding project name reached left into the deck and
+   struck the plates at every scroll position; the detail plate at the foot of
+   the stage already says which project is centred. */
+.pw__rail-tick {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.6;
+  transition: width 0.6s var(--ease), opacity 0.45s var(--ease);
+}
+.pw__rail-btn.is-on .pw__rail-tick { width: 38px; opacity: 1; }
+.pw__rail-no { flex: 0 0 auto; min-width: 2ch; text-align: right; }
+
+/* --- progress ------------------------------------------------------------- */
+.pw__meter {
+  position: absolute;
+  left: var(--gutter);
+  right: var(--gutter);
+  bottom: clamp(26px, 4vh, 44px);
+  height: 1px;
+  background: rgba(242, 238, 231, 0.14);
+}
+.pw__meter span {
+  display: block;
+  height: 100%;
+  background: var(--clay-soft);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+.pw__hint {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(50px, 6.5vh, 76px);
+  transform: translateX(-50%);
+  margin: 0;
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--pw-ink-m);
+}
+
+/* =========================================================================
+   CASE STUDY
+   The drawing plates already sit in each project's folder — 01 is the view
+   the panel shows, 02 onwards are the sheets. This is the only place on the
+   site they can be read.
+   ========================================================================= */
+.pwc {
+  position: fixed;
+  inset: 0;
+  z-index: 8000;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s var(--ease);
+}
+.pwc.is-open { opacity: 1; pointer-events: auto; }
+
+.pwc__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 7, 5, 0.88);
+  -webkit-backdrop-filter: blur(7px);
+  backdrop-filter: blur(7px);
+}
+
+.pwc__panel {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr);
+  width: min(1240px, calc(100vw - clamp(20px, 5vw, 80px)));
+  max-height: min(88svh, 920px);
+  background: var(--charcoal-2);
+  border: 1px solid var(--rule-invert);
+  color: var(--ink-invert);
+  overflow: hidden;
+  transform: translateY(24px) scale(0.985);
+  transition: transform 0.6s var(--ease);
+}
+.pwc.is-open .pwc__panel { transform: none; }
+
+/* --- gallery -------------------------------------------------------------- */
+.pwc__media {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--charcoal);
+  border-right: 1px solid var(--rule-invert);
+}
+.pwc__shot {
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 0;
+  background: var(--charcoal);
+}
+.pwc__shot img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.pwc__thumbs {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  border-top: 1px solid var(--rule-invert);
+}
+.pwc__thumb {
+  flex: 1 1 0;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border: 1px solid transparent;
+  opacity: 0.42;
+  transition: opacity 0.4s var(--ease), border-color 0.4s var(--ease);
+}
+.pwc__thumb img { width: 100%; height: 100%; object-fit: cover; }
+.pwc__thumb:hover { opacity: 0.8; }
+.pwc__thumb.is-on { opacity: 1; border-color: var(--clay-soft); }
+
+/* --- copy ----------------------------------------------------------------- */
+.pwc__body {
+  min-width: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: clamp(26px, 3vw, 46px);
+}
+.pwc__eyebrow { display: block; margin-bottom: 16px; }
+.pwc__title {
+  margin: 0 0 10px;
+  font-size: clamp(1.8rem, 3vw, 2.9rem);
+}
+.pwc__where {
+  margin: 0 0 26px;
+  font-size: 10.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-invert-m);
+}
+.pwc__story p {
+  margin: 0 0 16px;
+  font-size: 0.94rem;
+  line-height: 1.72;
+  color: var(--ink-invert-m);
+}
+
+.pwc__scope {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 26px 0;
+}
+.pwc__scope li {
+  padding: 6px 12px;
+  border: 1px solid var(--rule-invert);
+  font-size: 9.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-invert-m);
+}
+
+.pwc__specs {
+  margin: 0 0 30px;
+  border-top: 1px solid var(--rule-invert);
+}
+.pwc__specs > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--rule-invert);
+}
+.pwc__specs dt {
+  font-size: 9.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-invert-m);
+}
+.pwc__specs dd { margin: 0; font-size: 0.9rem; text-align: right; }
+
+.pwc__actions { margin-bottom: 24px; }
+
+.pwc__nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 18px;
+  border-top: 1px solid var(--rule-invert);
+}
+.pwc__nav button {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-invert-m);
+  transition: color 0.4s var(--ease);
+}
+.pwc__nav button:hover { color: var(--ink-invert); }
+
+.pwc__close {
+  position: absolute;
+  z-index: 2;
+  top: 14px;
+  right: 14px;
+  width: 40px;
+  height: 40px;
+  background: rgba(12, 11, 8, 0.72);
+  border: 1px solid var(--rule-invert);
+}
+.pwc__close span {
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  width: 16px;
+  height: 1px;
+  background: var(--ink-invert);
+}
+.pwc__close span:first-child { transform: rotate(45deg); }
+.pwc__close span:last-child { transform: rotate(-45deg); }
+
+/* =========================================================================
+   NARROW
+   The 3D stays — it is the point of the section — but the fan is tighter,
+   the rail goes away and the detail plate moves to the foot of the stage.
+   ========================================================================= */
+@media (max-width: 1080px) {
+  .pw__plate { width: min(300px, 38vw); }
+}
+
+@media (max-width: 860px) {
+  .pw {
+    --pw-w: min(70vw, 340px);
+    --pw-foot: 66px;
+    --pw-t: 12px;
+  }
+  .pw__stage { perspective: 1080px; }
+
+  .pw__rail,
+  .pw__hint,
+  .pw__stagehead-cap { display: none; }
+
+  .pw__plate {
+    left: 20px;
+    right: 20px;
+    width: auto;
+    bottom: clamp(52px, 8vh, 78px);
+    text-align: center;
+  }
+  .pw__plate-desc {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: 0.86rem;
+  }
+  .pw__meter { left: 20px; right: 20px; }
+
+  .pw__no { width: 40px; height: 40px; top: -12px; left: -12px; }
+
+  .pwc__panel {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
+    max-height: 92svh;
+  }
+  .pwc__media { border-right: 0; border-bottom: 1px solid var(--rule-invert); }
+  .pwc__shot { aspect-ratio: 4 / 3; flex: 0 0 auto; }
+  .pwc__shot img { object-fit: cover; }
+}
+
+/* =========================================================================
+   (c) FALLBACK — .is-plain
+   Reduced motion gets the same markup as a flat grid: no pin, no perspective,
+   no drift. Every plate is still a link into its case study.
+   ========================================================================= */
+.pw.is-plain { padding-block: var(--sec-y); }
+
+.pw.is-plain .pw__stage {
+  height: auto;
+  overflow: visible;
+  perspective: none;
+}
+.pw.is-plain .pw__room,
+.pw.is-plain .pw__floor,
+.pw.is-plain .pw__hud,
+.pw.is-plain .pw__edge,
+.pw.is-plain .pw__scrim,
+.pw.is-plain .pw__sheen,
+.pw.is-plain .pw__pool { display: none; }
+
+.pw.is-plain .pw__rig {
+  position: static;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: clamp(26px, 3vw, 44px);
+  padding-inline: var(--gutter);
+  transform: none !important;
+  transform-style: flat;
+}
+
+.pw.is-plain .pw__panel {
+  position: relative;
+  inset: auto;
+  margin: 0;
+  width: 100%;
+  height: auto;
+  transform: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform-style: flat;
+}
+
+.pw.is-plain .pw__face { position: static; }
+.pw.is-plain .pw__img { aspect-ratio: 4 / 3; flex: 0 0 auto; }
+.pw.is-plain .pw__no { top: 0; left: 0; transform: none; }
